@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
+import { CreateJobModal } from './CreateJobModal';
 import { jobsApi } from '@/services/api';
 import { formatSalary, formatDate } from '@/lib/utils';
 
@@ -18,20 +19,21 @@ const statusVariant: Record<string, 'success' | 'warning' | 'danger' | 'default'
 export function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const response = await jobsApi.getAll({ limit: 100 });
+      setJobs(response.data.jobs || []);
+    } catch (error) {
+      console.error('Failed to fetch jobs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const response = await jobsApi.getAll({ limit: 100 });
-        setJobs(response.data.jobs || []);
-      } catch (error) {
-        console.error('Failed to fetch jobs:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchJobs();
   }, []);
 
@@ -59,7 +61,7 @@ export function JobsPage() {
             <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Jobs</h1>
             <p className="text-surface-500 mt-1">{jobs.length} active positions</p>
           </div>
-          <Button variant="primary" icon={<Plus size={16} />}>
+          <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowCreateModal(true)}>
             Create Job
           </Button>
         </div>
@@ -136,6 +138,11 @@ export function JobsPage() {
           </StaggerContainer>
         )}
       </div>
+      <CreateJobModal 
+        isOpen={showCreateModal} 
+        onClose={() => setShowCreateModal(false)} 
+        onSuccess={fetchJobs}
+      />
     </PageTransition>
   );
 }
