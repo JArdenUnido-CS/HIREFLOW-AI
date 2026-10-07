@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, Sparkles, Upload, FileText, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 export function RegisterPage() {
@@ -17,7 +17,7 @@ export function RegisterPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadDone, setUploadDone] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const { register, isLoading } = useAuthStore();
+  const { register, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleStep1 = (e: React.FormEvent) => {
