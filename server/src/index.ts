@@ -9,6 +9,7 @@ import { jobsRouter } from './routes/jobs.js';
 import { interviewsRouter } from './routes/interviews.js';
 import { notificationsRouter } from './routes/notifications.js';
 import { activitiesRouter } from './routes/activities.js';
+import predictionsRouter from './routes/predictions.js';
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +30,7 @@ app.use('/api/jobs', jobsRouter);
 app.use('/api/interviews', interviewsRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/activities', activitiesRouter);
+app.use('/api/predictions', predictionsRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
