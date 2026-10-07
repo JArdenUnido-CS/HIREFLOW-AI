@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Video, MessageSquare, Brain, Sparkles, MapPin, Mail, Phone, ExternalLink, X } from 'lucide-react';
+import { Calendar, Clock, Video, MessageSquare, Brain, Sparkles, MapPin, Mail, Phone, ExternalLink, X, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
 import { ScheduleInterviewModal } from './ScheduleInterviewModal';
 import { interviewsApi, candidatesApi } from '@/services/api';
 import { formatDate, cn, getScoreColor } from '@/lib/utils';
+import toast from 'react-hot-toast';
 import type { InterviewQuestion, Interview } from '@/types';
 
 const generatedQuestions: InterviewQuestion[] = [
@@ -36,6 +38,8 @@ export function InterviewsPage() {
   const [interviews, setInterviews] = useState<any[]>([]);
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteInterviewId, setDeleteInterviewId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchInterviews = async () => {
     try {
@@ -62,6 +66,24 @@ export function InterviewsPage() {
     fetchInterviews();
     fetchCandidates();
   }, []);
+
+  const handleDeleteInterview = async () => {
+    if (!deleteInterviewId) return;
+
+    setDeletingId(deleteInterviewId);
+    try {
+      await interviewsApi.delete(deleteInterviewId);
+      toast.success('Interview deleted successfully');
+      setDeleteInterviewId(null);
+      setSelectedInterview(null);
+      fetchInterviews();
+    } catch (error) {
+      toast.error('Failed to delete interview');
+      console.error(error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const getCandidate = (candidateId: string) => candidates.find((c) => c.id === candidateId);
 
@@ -102,6 +124,16 @@ export function InterviewsPage() {
                       </div>
                     </div>
                     <Badge variant="info">{interview.type}</Badge>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteInterviewId(interview.id);
+                      }}
+                      className="p-1.5 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-lg transition-colors text-surface-500 hover:text-danger-600 dark:hover:text-danger-400"
+                      title="Delete interview"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
               </Card>
@@ -222,7 +254,16 @@ export function InterviewsPage() {
                 <div className="flex gap-2 pt-2 border-t border-surface-100 dark:border-surface-800">
                   <Button variant="primary" size="sm">Reschedule</Button>
                   <Button variant="secondary" size="sm">Add Notes</Button>
-                  <Button variant="ghost" size="sm">Cancel Interview</Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setDeleteInterviewId(selectedInterview.id);
+                      setSelectedInterview(null);
+                    }}
+                  >
+                    Delete Interview
+                  </Button>
                 </div>
               </div>
             );
@@ -234,6 +275,17 @@ export function InterviewsPage() {
           isOpen={showScheduleModal}
           onClose={() => setShowScheduleModal(false)}
           onSuccess={fetchInterviews}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={!!deleteInterviewId}
+          onClose={() => setDeleteInterviewId(null)}
+          onConfirm={handleDeleteInterview}
+          loading={!!deletingId}
+          title="Delete Interview"
+          message="Are you sure you want to delete this interview? The interview record and any associated notes will be permanently removed."
+          isDangerous={true}
         />
       </div>
     </PageTransition>

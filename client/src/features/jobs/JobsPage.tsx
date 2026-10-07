@@ -1,13 +1,15 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Briefcase, MapPin, Clock, Users, DollarSign, Plus } from 'lucide-react';
+import { Briefcase, MapPin, Clock, Users, DollarSign, Plus, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
 import { CreateJobModal } from './CreateJobModal';
 import { jobsApi } from '@/services/api';
 import { formatSalary, formatDate } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 const statusVariant: Record<string, 'success' | 'warning' | 'danger' | 'default'> = {
   open: 'success',
@@ -20,6 +22,8 @@ export function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [deleteJobId, setDeleteJobId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchJobs = async () => {
     try {
@@ -36,6 +40,23 @@ export function JobsPage() {
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  const handleDeleteJob = async () => {
+    if (!deleteJobId) return;
+    
+    setDeletingId(deleteJobId);
+    try {
+      await jobsApi.delete(deleteJobId);
+      toast.success('Job deleted successfully');
+      setDeleteJobId(null);
+      fetchJobs();
+    } catch (error) {
+      toast.error('Failed to delete job');
+      console.error(error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -126,11 +147,23 @@ export function JobsPage() {
                       <Users size={14} />
                       <span className="text-sm font-medium">{job.applicant_count} applicants</span>
                     </div>
-                    {job.deadline && (
-                      <span className="text-xs text-surface-400">
-                        Deadline: {formatDate(job.deadline)}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {job.deadline && (
+                        <span className="text-xs text-surface-400">
+                          Deadline: {formatDate(job.deadline)}
+                        </span>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setDeleteJobId(job.id);
+                        }}
+                        className="p-1.5 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-lg transition-colors text-surface-500 hover:text-danger-600 dark:hover:text-danger-400"
+                        title="Delete job"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </Card>
               </StaggerItem>
@@ -142,6 +175,15 @@ export function JobsPage() {
         isOpen={showCreateModal} 
         onClose={() => setShowCreateModal(false)} 
         onSuccess={fetchJobs}
+      />
+      <DeleteConfirmationModal
+        isOpen={!!deleteJobId}
+        onClose={() => setDeleteJobId(null)}
+        onConfirm={handleDeleteJob}
+        loading={!!deletingId}
+        title="Delete Job"
+        message="Are you sure you want to delete this job posting? This action cannot be undone and will remove all associated applications."
+        isDangerous={true}
       />
     </PageTransition>
   );

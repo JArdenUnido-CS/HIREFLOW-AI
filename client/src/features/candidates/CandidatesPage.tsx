@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, Mail, Phone, MapPin, ChevronDown } from 'lucide-react';
+import { Search, Plus, Mail, Phone, MapPin, ChevronDown, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
 import { AddCandidateModal } from './AddCandidateModal';
 import { candidatesApi } from '@/services/api';
@@ -40,6 +41,8 @@ export function CandidatesPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deleteCandidateId, setDeleteCandidateId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchCandidates = async () => {
     try {
@@ -69,6 +72,23 @@ export function CandidatesPage() {
       console.error(error);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleDeleteCandidate = async () => {
+    if (!deleteCandidateId) return;
+
+    setDeletingId(deleteCandidateId);
+    try {
+      await candidatesApi.delete(deleteCandidateId);
+      toast.success('Candidate deleted successfully');
+      setDeleteCandidateId(null);
+      fetchCandidates();
+    } catch (error) {
+      toast.error('Failed to delete candidate');
+      console.error(error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -144,35 +164,44 @@ export function CandidatesPage() {
                         </span>
                       </div>
                     </div>
-                    {/* Status Dropdown */}
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenDropdown(openDropdown === candidate.id ? null : candidate.id)}
-                        disabled={updatingId === candidate.id}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-surface-300 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors disabled:opacity-50"
-                      >
-                        <span className="text-xs font-medium">{statusLabels[candidate.status]}</span>
-                        <ChevronDown size={14} className={cn('transition-transform', openDropdown === candidate.id && 'rotate-180')} />
-                      </button>
+                    {/* Status Dropdown & Delete */}
+                    <div className="flex items-center gap-2">
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenDropdown(openDropdown === candidate.id ? null : candidate.id)}
+                          disabled={updatingId === candidate.id}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-surface-300 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors disabled:opacity-50"
+                        >
+                          <span className="text-xs font-medium">{statusLabels[candidate.status]}</span>
+                          <ChevronDown size={14} className={cn('transition-transform', openDropdown === candidate.id && 'rotate-180')} />
+                        </button>
 
-                      {/* Dropdown Menu */}
-                      {openDropdown === candidate.id && (
-                        <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg z-10">
-                          {Object.entries(statusLabels).map(([status, label]) => (
-                            <button
-                              key={status}
-                              onClick={() => handleStatusChange(candidate.id, status)}
-                              disabled={updatingId === candidate.id}
-                              className={cn(
-                                'w-full text-left px-4 py-2 text-sm hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors first:rounded-t-lg last:rounded-b-lg disabled:opacity-50',
-                                candidate.status === status && 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 font-medium'
-                              )}
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        {/* Dropdown Menu */}
+                        {openDropdown === candidate.id && (
+                          <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg z-10">
+                            {Object.entries(statusLabels).map(([status, label]) => (
+                              <button
+                                key={status}
+                                onClick={() => handleStatusChange(candidate.id, status)}
+                                disabled={updatingId === candidate.id}
+                                className={cn(
+                                  'w-full text-left px-4 py-2 text-sm hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors first:rounded-t-lg last:rounded-b-lg disabled:opacity-50',
+                                  candidate.status === status && 'bg-brand-50 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400 font-medium'
+                                )}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setDeleteCandidateId(candidate.id)}
+                        className="p-1.5 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-lg transition-colors text-surface-500 hover:text-danger-600 dark:hover:text-danger-400"
+                        title="Delete candidate"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 </Card>
@@ -186,6 +215,17 @@ export function CandidatesPage() {
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
           onSuccess={fetchCandidates}
+        />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={!!deleteCandidateId}
+          onClose={() => setDeleteCandidateId(null)}
+          onConfirm={handleDeleteCandidate}
+          loading={!!deletingId}
+          title="Delete Candidate"
+          message="Are you sure you want to delete this candidate? All associated data including interview records and activity logs will be removed."
+          isDangerous={true}
         />
       </div>
     </PageTransition>
