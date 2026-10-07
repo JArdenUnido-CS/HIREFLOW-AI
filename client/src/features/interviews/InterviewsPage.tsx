@@ -203,7 +203,7 @@ export function InterviewsPage() {
           size="lg"
         >
           {selectedInterview && (() => {
-            const candidate = getCandidate(selectedInterview.candidate_id);
+            const candidate = getCandidate(selectedInterview.candidateId);
             return (
               <div className="space-y-5">
                 {/* Candidate info */}
@@ -213,7 +213,7 @@ export function InterviewsPage() {
                     <h3 className="text-lg font-bold text-surface-900 dark:text-white">
                       {candidate?.name || 'Unknown Candidate'}
                     </h3>
-                    <p className="text-sm text-surface-500">Job ID: {selectedInterview.job_id}</p>
+                    <p className="text-sm text-surface-500">Job ID: {selectedInterview.jobId}</p>
                     {candidate && (
                       <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-surface-500">
                         <span className="flex items-center gap-1"><Mail size={12} />{candidate.email}</span>
@@ -229,9 +229,9 @@ export function InterviewsPage() {
                   <div className="p-3 rounded-xl bg-surface-50 dark:bg-surface-800/30">
                     <p className="text-xs text-surface-400 mb-1">Date & Time</p>
                     <p className="text-sm font-medium text-surface-800 dark:text-surface-200">
-                      {formatDate(selectedInterview.scheduled_at)}
+                      {formatDate(selectedInterview.scheduledAt)}
                     </p>
-                    <p className="text-xs text-surface-500">{new Date(selectedInterview.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-xs text-surface-500">{new Date(selectedInterview.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                   <div className="p-3 rounded-xl bg-surface-50 dark:bg-surface-800/30">
                     <p className="text-xs text-surface-400 mb-1">Interview Type</p>

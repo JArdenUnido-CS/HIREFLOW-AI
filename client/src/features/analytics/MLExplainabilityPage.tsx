@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
-import { api } from '@/services/api';
+import api from '@/services/api';
 import toast from 'react-hot-toast';
 
 interface ModelMetrics {
