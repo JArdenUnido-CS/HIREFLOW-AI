@@ -1,1 +1,13 @@
 node_modules
+.env
+.env.local
+.env.*.local
+dist
+build
+.DS_Store
+*.log
+.vscode
+.idea
+.cache
+.next
+coverage

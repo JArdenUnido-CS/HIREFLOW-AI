@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import {
   Users, UserPlus, Calendar, XCircle, CheckCircle, Clock,
   TrendingUp, Target, ArrowUpRight, Briefcase,
@@ -6,21 +7,128 @@ import {
 import { Card } from '@/components/ui/Card';
 import { AnimatedCounter } from '@/components/shared/AnimatedCounter';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
-import { dashboardStats, sampleActivities, sampleInterviews, hiringFunnelData } from '@/data/sampleData';
 import { formatRelativeTime } from '@/lib/utils';
 import { HiringFunnelChart } from './HiringFunnelChart';
 import { RecentActivity } from './RecentActivity';
-
-const statCards = [
-  { label: 'Total Candidates', value: dashboardStats.totalCandidates, icon: Users, color: 'from-brand-500 to-brand-600', change: '+12%' },
-  { label: 'This Week', value: dashboardStats.candidatesThisWeek, icon: UserPlus, color: 'from-violet-500 to-violet-600', change: '+8%' },
-  { label: 'Interviews', value: dashboardStats.interviewsScheduled, icon: Calendar, color: 'from-amber-500 to-orange-500', change: '+5' },
-  { label: 'Pending Review', value: dashboardStats.pendingReview, icon: Clock, color: 'from-cyan-500 to-blue-500', change: '-15' },
-  { label: 'Accepted', value: dashboardStats.accepted, icon: CheckCircle, color: 'from-emerald-500 to-green-500', change: '+3' },
-  { label: 'Rejected', value: dashboardStats.rejected, icon: XCircle, color: 'from-red-400 to-red-500', change: '+7' },
-];
+import { candidatesApi, jobsApi, interviewsApi, activitiesApi } from '@/services/api';
 
 export function DashboardPage() {
+  const [stats, setStats] = useState({
+    totalCandidates: 0,
+    candidatesThisWeek: 0,
+    interviewsScheduled: 0,
+    pendingReview: 0,
+    accepted: 0,
+    rejected: 0,
+    averageResumeScore: 0,
+    averageMatchScore: 0,
+  });
+
+  const [hiringFunnelData, setHiringFunnelData] = useState<any[]>([]);
+  const [upcomingInterviews, setUpcomingInterviews] = useState<any[]>([]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch candidates
+        const candidatesRes = await candidatesApi.getAll({ limit: 1000 });
+        const candidates = candidatesRes.data.candidates || [];
+
+        // Fetch jobs
+        const jobsRes = await jobsApi.getAll({ limit: 100 });
+        const jobs = jobsRes.data.jobs || [];
+
+        // Fetch interviews
+        const interviewsRes = await interviewsApi.getUpcoming();
+        const upcomingInterviewsList = interviewsRes.data.interviews || [];
+
+        // Fetch activities
+        const activitiesRes = await activitiesApi.getRecent(7);
+        const activities = activitiesRes.data.activities || [];
+
+        // Calculate stats
+        const totalCandidates = candidates.length;
+        const candidatesThisWeek = candidates.filter((c: any) => {
+          const appliedDate = new Date(c.applied_at);
+          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          return appliedDate >= weekAgo;
+        }).length;
+
+        const interviewsScheduled = upcomingInterviewsList.length;
+        const pendingReview = candidates.filter((c: any) => c.status === 'screening').length;
+        const accepted = candidates.filter((c: any) => c.status === 'hired').length;
+        const rejected = candidates.filter((c: any) => c.status === 'rejected').length;
+
+        // Calculate average scores
+        const avgResumeScore = Math.round(
+          candidates.reduce((sum: number, c: any) => sum + (c.ai_scores?.overall || 0), 0) / Math.max(1, candidates.length)
+        );
+        const avgMatchScore = Math.round(
+          candidates.reduce((sum: number, c: any) => sum + (c.match_scores?.overall || 0), 0) / Math.max(1, candidates.length)
+        );
+
+        setStats({
+          totalCandidates,
+          candidatesThisWeek,
+          interviewsScheduled,
+          pendingReview,
+          accepted,
+          rejected,
+          averageResumeScore: avgResumeScore,
+          averageMatchScore: avgMatchScore,
+        });
+
+        // Build hiring funnel data
+        const funnel = [
+          { label: 'Applied', value: candidates.filter((c: any) => c.status === 'applied').length, color: '#6b7a8d' },
+          { label: 'Screening', value: candidates.filter((c: any) => c.status === 'screening').length, color: '#4c6ef5' },
+          { label: 'Shortlisted', value: candidates.filter((c: any) => c.status === 'shortlisted').length, color: '#7c3aed' },
+          { label: 'Interview', value: candidates.filter((c: any) => c.status === 'interview').length, color: '#f59e0b' },
+          { label: 'Offer', value: candidates.filter((c: any) => c.status === 'offer').length, color: '#10b981' },
+          { label: 'Hired', value: candidates.filter((c: any) => c.status === 'hired').length, color: '#059669' },
+        ];
+        setHiringFunnelData(funnel);
+
+        setUpcomingInterviews(upcomingInterviewsList.slice(0, 5));
+        setRecentActivities(activities.slice(0, 7));
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const statCards = [
+    { label: 'Total Candidates', value: stats.totalCandidates, icon: Users, color: 'from-brand-500 to-brand-600', change: '+12%' },
+    { label: 'This Week', value: stats.candidatesThisWeek, icon: UserPlus, color: 'from-violet-500 to-violet-600', change: '+8%' },
+    { label: 'Interviews', value: stats.interviewsScheduled, icon: Calendar, color: 'from-amber-500 to-orange-500', change: '+5' },
+    { label: 'Pending Review', value: stats.pendingReview, icon: Clock, color: 'from-cyan-500 to-blue-500', change: '-15' },
+    { label: 'Accepted', value: stats.accepted, icon: CheckCircle, color: 'from-emerald-500 to-green-500', change: '+3' },
+    { label: 'Rejected', value: stats.rejected, icon: XCircle, color: 'from-red-400 to-red-500', change: '+7' },
+  ];
+
+  if (loading) {
+    return (
+      <PageTransition>
+        <div className="space-y-6">
+          <div className="h-8 bg-surface-200 dark:bg-surface-700 rounded w-1/4 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-32 bg-surface-200 dark:bg-surface-700 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className="space-y-6">
@@ -91,7 +199,7 @@ export function DashboardPage() {
                   <p className="text-sm text-surface-500 dark:text-surface-400">Avg Resume Score</p>
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-surface-900 dark:text-white">
-                      <AnimatedCounter value={dashboardStats.averageResumeScore} />
+                      <AnimatedCounter value={stats.averageResumeScore} />
                     </span>
                     <span className="text-sm text-surface-400">/100</span>
                   </div>
@@ -113,7 +221,7 @@ export function DashboardPage() {
                   <p className="text-sm text-surface-500 dark:text-surface-400">Avg Match Score</p>
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-surface-900 dark:text-white">
-                      <AnimatedCounter value={dashboardStats.averageMatchScore} />
+                      <AnimatedCounter value={stats.averageMatchScore} />
                     </span>
                     <span className="text-sm text-surface-400">/100</span>
                   </div>
@@ -149,36 +257,27 @@ export function DashboardPage() {
                 Upcoming Interviews
               </h3>
               <div className="space-y-3">
-                {sampleInterviews.map((interview) => (
-                  <div
-                    key={interview.id}
-                    className="p-3 rounded-xl bg-surface-50 dark:bg-surface-800/50 border border-surface-100 dark:border-surface-700/30"
-                  >
-                    <p className="text-sm font-medium text-surface-800 dark:text-surface-200">
-                      {interview.candidateName}
-                    </p>
-                    <p className="text-xs text-surface-500 mt-0.5">{interview.jobTitle}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Calendar size={12} className="text-brand-500" />
-                      <span className="text-xs text-surface-500">
-                        {formatRelativeTime(interview.scheduledAt)}
-                      </span>
+                {upcomingInterviews.length > 0 ? (
+                  upcomingInterviews.map((interview: any) => (
+                    <div key={interview.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-surface-50 dark:hover:bg-surface-900/50 transition-colors">
+                      <div className="w-2 h-2 rounded-full bg-brand-500 mt-1.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-surface-900 dark:text-white truncate">
+                          {interview.candidateName}
+                        </p>
+                        <p className="text-xs text-surface-500 dark:text-surface-400">
+                          {formatRelativeTime(interview.scheduled_at)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-surface-500 dark:text-surface-400">No upcoming interviews</p>
+                )}
               </div>
             </Card>
           </motion.div>
         </div>
-
-        {/* Recent Activity */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9 }}
-        >
-          <RecentActivity activities={sampleActivities} />
-        </motion.div>
       </div>
     </PageTransition>
   );

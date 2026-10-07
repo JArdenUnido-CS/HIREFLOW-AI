@@ -4,26 +4,25 @@ import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuth } from '@/hooks/useAuth';
+import toast from 'react-hot-toast';
 
 export function LoginPage() {
   const [email, setEmail] = useState('JardenUnido@hireflow.ai');
   const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, error: authError } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     try {
       await login(email, password);
-      // Route based on role - admin goes to dashboard, candidates go to portal
-      const isAdmin = email.toLowerCase() === 'jardenunido@hireflow.ai';
-      navigate(isAdmin ? '/dashboard' : '/portal');
-    } catch {
-      setError('Invalid credentials');
+      // Navigate based on role - will be done by App.tsx
+      toast.success('Login successful!');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(authError || 'Login failed');
     }
   };
 
@@ -161,13 +160,13 @@ export function LoginPage() {
                 </Link>
               </div>
 
-              {error && (
+              {authError && (
                 <motion.p
                   initial={{ opacity: 0, y: -5 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg"
                 >
-                  {error}
+                  {authError}
                 </motion.p>
               )}
 
