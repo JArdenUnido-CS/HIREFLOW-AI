@@ -33,17 +33,38 @@ export function PipelinePage() {
     setIsRefreshing(true);
     try {
       const response = await candidatesApi.getAll({ limit: 1000 });
+      console.log('Candidates API response:', response);
       const apiCandidates = response.data.candidates || [];
-      // Map API candidates to match the Candidate type structure
+      console.log('API Candidates (raw):', apiCandidates);
+      
+      // Map API candidates from snake_case to camelCase and ensure all required fields
       setCandidates(apiCandidates.map((c: any) => ({
-        ...c,
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        location: c.location,
+        linkedin: c.linkedin,
+        github: c.github,
+        portfolio: c.portfolio,
+        photoUrl: c.photo_url,
+        resumeUrl: c.resume_url,
+        resumeText: c.resume_text,
+        parsedData: c.parsed_data || {},
+        aiScores: c.ai_scores || {},
+        matchScores: c.match_scores,
         status: c.status || 'applied',
-        jobId: c.jobId || sampleCandidates[0]?.jobId || '1',
+        jobId: c.job_id || sampleCandidates[0]?.jobId || '1',
+        appliedAt: c.applied_at,
+        createdAt: c.created_at,
+        updatedAt: c.updated_at,
       })));
       toast.success('Pipeline data refreshed');
-    } catch (error) {
-      toast.error('Failed to refresh pipeline data');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Refresh error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      toast.error(`Failed to refresh pipeline data: ${error.response?.status || error.message}`);
     } finally {
       setIsRefreshing(false);
     }

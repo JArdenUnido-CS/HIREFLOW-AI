@@ -24,14 +24,38 @@ export function AnalysisPage() {
     try {
       const response = await candidatesApi.getAll({ limit: 1000 });
       const apiCandidates = response.data.candidates || [];
+      
       if (apiCandidates.length > 0) {
-        setAllCandidates(apiCandidates);
-        setSelectedCandidate(apiCandidates[0]);
+        // Map from snake_case to camelCase
+        const mapped = apiCandidates.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone,
+          location: c.location,
+          linkedin: c.linkedin,
+          github: c.github,
+          portfolio: c.portfolio,
+          photoUrl: c.photo_url,
+          resumeUrl: c.resume_url,
+          resumeText: c.resume_text,
+          parsedData: c.parsed_data || {},
+          aiScores: c.ai_scores || {},
+          matchScores: c.match_scores,
+          status: c.status || 'applied',
+          jobId: c.job_id,
+          appliedAt: c.applied_at,
+          createdAt: c.created_at,
+          updatedAt: c.updated_at,
+        }));
+        setAllCandidates(mapped);
+        setSelectedCandidate(mapped[0]);
       }
       toast.success('Analysis data refreshed');
-    } catch (error) {
-      toast.error('Failed to refresh analysis data');
-      console.error(error);
+    } catch (error: any) {
+      console.error('Analysis refresh error:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error(`Failed to refresh analysis data: ${error.response?.status || error.message}`);
     } finally {
       setIsRefreshing(false);
     }
