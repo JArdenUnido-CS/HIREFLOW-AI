@@ -68,8 +68,9 @@ export function InterviewsPage() {
     try {
       await Promise.all([fetchInterviews(), fetchCandidates()]);
       toast.success('Data refreshed successfully');
-    } catch (error) {
-      toast.error('Failed to refresh data');
+    } catch (error: any) {
+      console.error('Interviews refresh error:', error);
+      toast.error(`Failed to refresh data: ${error.response?.status || error.message}`);
     } finally {
       setIsRefreshing(false);
     }
