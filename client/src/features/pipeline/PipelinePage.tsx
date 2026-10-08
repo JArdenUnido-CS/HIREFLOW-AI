@@ -188,29 +188,29 @@ export function PipelinePage() {
 
                 {/* Summary */}
                 <p className="text-sm text-surface-600 dark:text-surface-400 leading-relaxed">
-                  {selectedCandidate.parsedData.summary}
+                  {selectedCandidate.parsedData?.summary || 'No summary available'}
                 </p>
 
                 {/* Scores */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="p-3 rounded-xl bg-surface-50 dark:bg-surface-800/30 text-center">
                     <p className="text-xs text-surface-400">AI Score</p>
-                    <p className={cn('text-xl font-bold', getScoreColor(selectedCandidate.aiScores.overall))}>
-                      {selectedCandidate.aiScores.overall}
+                    <p className={cn('text-xl font-bold', getScoreColor(selectedCandidate.aiScores?.overall || 0))}>
+                      {selectedCandidate.aiScores?.overall || 0}
                     </p>
                   </div>
                   {selectedCandidate.matchScores && (
                     <div className="p-3 rounded-xl bg-surface-50 dark:bg-surface-800/30 text-center">
                       <p className="text-xs text-surface-400">Match</p>
-                      <p className={cn('text-xl font-bold', getScoreColor(selectedCandidate.matchScores.overall))}>
-                        {selectedCandidate.matchScores.overall}%
+                      <p className={cn('text-xl font-bold', getScoreColor(selectedCandidate.matchScores.overall || 0))}>
+                        {selectedCandidate.matchScores.overall || 0}%
                       </p>
                     </div>
                   )}
                   <div className="p-3 rounded-xl bg-surface-50 dark:bg-surface-800/30 text-center">
                     <p className="text-xs text-surface-400">Experience</p>
                     <p className="text-xl font-bold text-surface-800 dark:text-surface-200">
-                      {selectedCandidate.parsedData.totalYearsExperience}y
+                      {selectedCandidate.parsedData?.totalYearsExperience || 0}y
                     </p>
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export function PipelinePage() {
                 <div>
                   <p className="text-xs font-semibold text-surface-500 uppercase tracking-wide mb-2">Skills</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {selectedCandidate.parsedData.skills.flatMap((c) => c.skills).slice(0, 10).map((skill) => (
+                    {(selectedCandidate.parsedData?.skills || []).flatMap((c) => c?.skills || []).slice(0, 10).map((skill) => (
                       <Badge key={skill} variant="default" size="sm">{skill}</Badge>
                     ))}
                   </div>
@@ -228,14 +228,14 @@ export function PipelinePage() {
                 {/* Experience */}
                 <div>
                   <p className="text-xs font-semibold text-surface-500 uppercase tracking-wide mb-2">Recent Experience</p>
-                  {selectedCandidate.parsedData.experience.slice(0, 2).map((exp, i) => (
+                  {(selectedCandidate.parsedData?.experience || []).slice(0, 2).map((exp, i) => (
                     <div key={i} className="flex items-start gap-3 py-2">
                       <div className="w-8 h-8 rounded-lg bg-surface-100 dark:bg-surface-800 flex items-center justify-center shrink-0">
                         <Briefcase size={14} className="text-surface-400" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-surface-800 dark:text-surface-200">{exp.title}</p>
-                        <p className="text-xs text-surface-500">{exp.company} · {exp.startDate} — {exp.endDate}</p>
+                        <p className="text-sm font-medium text-surface-800 dark:text-surface-200">{exp?.title || 'N/A'}</p>
+                        <p className="text-xs text-surface-500">{exp?.company || 'N/A'} · {exp?.startDate || 'N/A'} — {exp?.endDate || 'N/A'}</p>
                       </div>
                     </div>
                   ))}
@@ -292,14 +292,14 @@ function PipelineCard({
       </div>
       <div className="flex items-center justify-between">
         <div className="flex gap-1">
-          {candidate.parsedData.skills[0]?.skills.slice(0, 2).map((skill) => (
+          {candidate.parsedData?.skills?.[0]?.skills?.slice(0, 2).map((skill) => (
             <span key={skill} className="text-[10px] px-1.5 py-0.5 rounded bg-surface-100 dark:bg-surface-700 text-surface-500 dark:text-surface-400">
               {skill}
             </span>
           ))}
         </div>
-        <span className={cn('text-xs font-bold', getScoreColor(candidate.aiScores.overall))}>
-          {candidate.aiScores.overall}
+        <span className={cn('text-xs font-bold', getScoreColor(candidate.aiScores?.overall || 0))}>
+          {candidate.aiScores?.overall || 0}
         </span>
       </div>
     </motion.div>
