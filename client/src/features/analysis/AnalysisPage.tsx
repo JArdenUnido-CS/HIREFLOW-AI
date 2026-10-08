@@ -27,28 +27,33 @@ export function AnalysisPage() {
       const apiCandidates = response.data.candidates || [];
       
       if (apiCandidates.length > 0) {
-        // Map from snake_case to camelCase
-        const mapped = apiCandidates.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          email: c.email,
-          phone: c.phone,
-          location: c.location,
-          linkedin: c.linkedin,
-          github: c.github,
-          portfolio: c.portfolio,
-          photoUrl: c.photo_url,
-          resumeUrl: c.resume_url,
-          resumeText: c.resume_text,
-          parsedData: c.parsed_data || {},
-          aiScores: c.ai_scores || {},
-          matchScores: c.match_scores,
-          status: c.status || 'applied',
-          jobId: c.job_id,
-          appliedAt: c.applied_at,
-          createdAt: c.created_at,
-          updatedAt: c.updated_at,
-        }));
+        // Map from snake_case to camelCase and preserve AI scores from sample data
+        const mapped = apiCandidates.map((c: any) => {
+          // Find corresponding sample candidate to preserve AI scores
+          const sampleCandidate = sampleCandidates.find(sc => sc.email === c.email);
+          
+          return {
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            location: c.location,
+            linkedin: c.linkedin,
+            github: c.github,
+            portfolio: c.portfolio,
+            photoUrl: c.photo_url,
+            resumeUrl: c.resume_url,
+            resumeText: c.resume_text,
+            parsedData: c.parsed_data || sampleCandidate?.parsedData || {},
+            aiScores: c.ai_scores && Object.keys(c.ai_scores).length > 0 ? c.ai_scores : (sampleCandidate?.aiScores || {}),
+            matchScores: c.match_scores || (sampleCandidate?.matchScores || {}),
+            status: c.status || 'applied',
+            jobId: c.job_id,
+            appliedAt: c.applied_at,
+            createdAt: c.created_at,
+            updatedAt: c.updated_at,
+          };
+        });
         setAllCandidates(mapped);
         setSelectedCandidate(mapped[0]);
       }
@@ -63,13 +68,13 @@ export function AnalysisPage() {
   };
 
   const radarData = [
-    { subject: 'Technical', value: selectedCandidate.aiScores.technical },
-    { subject: 'Experience', value: selectedCandidate.aiScores.experience },
-    { subject: 'Leadership', value: selectedCandidate.aiScores.leadership },
-    { subject: 'Communication', value: selectedCandidate.aiScores.communication },
-    { subject: 'Problem Solving', value: selectedCandidate.aiScores.problemSolving },
-    { subject: 'Teamwork', value: selectedCandidate.aiScores.teamwork },
-    { subject: 'Learning', value: selectedCandidate.aiScores.learningPotential },
+    { subject: 'Technical', value: selectedCandidate.aiScores?.technical || 0 },
+    { subject: 'Experience', value: selectedCandidate.aiScores?.experience || 0 },
+    { subject: 'Leadership', value: selectedCandidate.aiScores?.leadership || 0 },
+    { subject: 'Communication', value: selectedCandidate.aiScores?.communication || 0 },
+    { subject: 'Problem Solving', value: selectedCandidate.aiScores?.problemSolving || 0 },
+    { subject: 'Teamwork', value: selectedCandidate.aiScores?.teamwork || 0 },
+    { subject: 'Learning', value: selectedCandidate.aiScores?.learningPotential || 0 },
   ];
 
   return (
@@ -119,12 +124,12 @@ export function AnalysisPage() {
           <Avatar name={selectedCandidate.name} size="xl" />
           <div className="flex-1">
             <h2 className="text-xl font-bold text-surface-900 dark:text-white">{selectedCandidate.name}</h2>
-            <p className="text-surface-500">{selectedCandidate.parsedData.summary.slice(0, 100)}...</p>
+            <p className="text-surface-500">{(selectedCandidate.parsedData?.summary || 'No summary available').slice(0, 100)}...</p>
           </div>
           <div className="flex items-center gap-6">
-            <RadialProgress value={selectedCandidate.aiScores.overall} size={70} label="Overall" />
+            <RadialProgress value={selectedCandidate.aiScores?.overall || 0} size={70} label="Overall" />
             {selectedCandidate.matchScores && (
-              <RadialProgress value={selectedCandidate.matchScores.overall} size={70} label="Match" />
+              <RadialProgress value={selectedCandidate.matchScores.overall || 0} size={70} label="Match" />
             )}
           </div>
         </Card>
@@ -132,28 +137,28 @@ export function AnalysisPage() {
         {/* Score Cards Grid */}
         <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StaggerItem>
-            <ScoreCard label="Technical" score={selectedCandidate.aiScores.technical} icon={<Brain size={16} />} delay={0} />
+            <ScoreCard label="Technical" score={selectedCandidate.aiScores?.technical || 0} icon={<Brain size={16} />} delay={0} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="Experience" score={selectedCandidate.aiScores.experience} icon={<Award size={16} />} delay={0.1} />
+            <ScoreCard label="Experience" score={selectedCandidate.aiScores?.experience || 0} icon={<Award size={16} />} delay={0.1} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="Leadership" score={selectedCandidate.aiScores.leadership} icon={<TrendingUp size={16} />} delay={0.2} />
+            <ScoreCard label="Leadership" score={selectedCandidate.aiScores?.leadership || 0} icon={<TrendingUp size={16} />} delay={0.2} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="Communication" score={selectedCandidate.aiScores.communication} icon={<Target size={16} />} delay={0.3} />
+            <ScoreCard label="Communication" score={selectedCandidate.aiScores?.communication || 0} icon={<Target size={16} />} delay={0.3} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="Problem Solving" score={selectedCandidate.aiScores.problemSolving} delay={0.4} />
+            <ScoreCard label="Problem Solving" score={selectedCandidate.aiScores?.problemSolving || 0} delay={0.4} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="Teamwork" score={selectedCandidate.aiScores.teamwork} delay={0.5} />
+            <ScoreCard label="Teamwork" score={selectedCandidate.aiScores?.teamwork || 0} delay={0.5} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="Learning Potential" score={selectedCandidate.aiScores.learningPotential} delay={0.6} />
+            <ScoreCard label="Learning Potential" score={selectedCandidate.aiScores?.learningPotential || 0} delay={0.6} />
           </StaggerItem>
           <StaggerItem>
-            <ScoreCard label="ATS Score" score={selectedCandidate.aiScores.atsCompatibility} delay={0.7} />
+            <ScoreCard label="ATS Score" score={selectedCandidate.aiScores?.atsCompatibility || 0} delay={0.7} />
           </StaggerItem>
         </StaggerContainer>
 
@@ -192,7 +197,7 @@ export function AnalysisPage() {
                 Strengths
               </h3>
               <ul className="space-y-2">
-                {selectedCandidate.aiScores.strengths.map((s, i) => (
+                {(selectedCandidate.aiScores?.strengths || []).map((s, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-surface-700 dark:text-surface-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
                     {s}
@@ -207,7 +212,7 @@ export function AnalysisPage() {
                 Areas for Improvement
               </h3>
               <ul className="space-y-2">
-                {selectedCandidate.aiScores.weaknesses.map((w, i) => (
+                {(selectedCandidate.aiScores?.weaknesses || []).map((w, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-surface-700 dark:text-surface-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                     {w}
@@ -222,11 +227,11 @@ export function AnalysisPage() {
                 AI Recommendation
               </h3>
               <p className="text-sm text-surface-700 dark:text-surface-300">
-                {selectedCandidate.aiScores.recommendations[0]}
+                {(selectedCandidate.aiScores?.recommendations || ['No recommendation available'])[0]}
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-xs text-surface-500">Confidence:</span>
-                <Badge variant="brand">{selectedCandidate.aiScores.confidenceLevel}%</Badge>
+                <Badge variant="brand">{selectedCandidate.aiScores?.confidenceLevel || 0}%</Badge>
               </div>
             </Card>
           </motion.div>
