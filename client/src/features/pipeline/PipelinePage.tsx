@@ -38,28 +38,33 @@ export function PipelinePage() {
       const apiCandidates = response.data.candidates || [];
       console.log('API Candidates (raw):', apiCandidates);
       
-      // Map API candidates from snake_case to camelCase and ensure all required fields
-      setCandidates(apiCandidates.map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        email: c.email,
-        phone: c.phone,
-        location: c.location,
-        linkedin: c.linkedin,
-        github: c.github,
-        portfolio: c.portfolio,
-        photoUrl: c.photo_url,
-        resumeUrl: c.resume_url,
-        resumeText: c.resume_text,
-        parsedData: c.parsed_data || {},
-        aiScores: c.ai_scores || {},
-        matchScores: c.match_scores,
-        status: c.status || 'applied',
-        jobId: c.job_id || sampleCandidates[0]?.jobId || '1',
-        appliedAt: c.applied_at,
-        createdAt: c.created_at,
-        updatedAt: c.updated_at,
-      })));
+      // Map API candidates from snake_case to camelCase and preserve AI scores from sample data
+      setCandidates(apiCandidates.map((c: any) => {
+        // Find corresponding sample candidate to preserve AI scores
+        const sampleCandidate = sampleCandidates.find(sc => sc.email === c.email);
+        
+        return {
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone,
+          location: c.location,
+          linkedin: c.linkedin,
+          github: c.github,
+          portfolio: c.portfolio,
+          photoUrl: c.photo_url,
+          resumeUrl: c.resume_url,
+          resumeText: c.resume_text,
+          parsedData: c.parsed_data || sampleCandidate?.parsedData || {},
+          aiScores: c.ai_scores && Object.keys(c.ai_scores).length > 0 ? c.ai_scores : (sampleCandidate?.aiScores || {}),
+          matchScores: c.match_scores || (sampleCandidate?.matchScores || {}),
+          status: c.status || 'applied',
+          jobId: c.job_id || sampleCandidate?.jobId || sampleCandidates[0]?.jobId || '1',
+          appliedAt: c.applied_at,
+          createdAt: c.created_at,
+          updatedAt: c.updated_at,
+        };
+      }));
       toast.success('Pipeline data refreshed');
     } catch (error: any) {
       console.error('Refresh error:', error);
@@ -82,9 +87,27 @@ export function PipelinePage() {
 
   const handleDrop = (stageId: PipelineStage) => {
     if (draggedCandidate) {
-      setCandidates((prev) =>
-        prev.map((c) => (c.id === draggedCandidate ? { ...c, status: stageId } : c))
-      );
+      const candidate = candidates.find(c => c.id === draggedCandidate);
+      if (candidate && candidate.status !== stageId) {
+        // Update local state
+        setCandidates((prev) =>
+          prev.map((c) => (c.id === draggedCandidate ? { ...c, status: stageId } : c))
+        );
+        
+        // Save to database
+        candidatesApi.update(draggedCandidate, { status: stageId })
+          .then(() => {
+            toast.success(`Candidate moved to ${stageId}`);
+          })
+          .catch((error) => {
+            toast.error('Failed to update candidate status');
+            console.error('Update error:', error);
+            // Revert on failure
+            setCandidates((prev) =>
+              prev.map((c) => (c.id === draggedCandidate ? { ...c, status: candidate.status } : c))
+            );
+          });
+      }
     }
     setDraggedCandidate(null);
     setDropTarget(null);
