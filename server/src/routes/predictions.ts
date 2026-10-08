@@ -1,7 +1,7 @@
-"""
-DES-05: Prediction API Endpoint
-Integrates ML model for candidate-job matching predictions
-"""
+/**
+ * DES-05: Prediction API Endpoint
+ * Integrates ML model for candidate-job matching predictions
+ */
 
 import express, { Request, Response } from 'express';
 import fs from 'fs';
