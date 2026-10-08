@@ -1,0 +1,146 @@
+FIGURE 11: API / INFERENCE FLOW DIAGRAM
+═════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    CLIENT APPLICATION                           │
+│                   (React Frontend)                              │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         │ HTTP/REST
+                         ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                   API GATEWAY                                   │
+│           (Express.js Backend - Port 3001)                      │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  Routes / Middleware                                    │   │
+│  │  ├── /api/auth (Authentication)                        │   │
+│  │  ├── /api/candidates (Candidate Management)            │   │
+│  │  ├── /api/jobs (Job Management)                        │   │
+│  │  ├── /api/interviews (Interview Scheduling)           │   │
+│  │  └── /api/analytics (Analytics & Metrics)             │   │
+│  └──────────────────────┬──────────────────────────────────┘   │
+│                         │                                       │
+│  ┌──────────────────────↓──────────────────────────────────┐   │
+│  │  Controllers & Services                                 │   │
+│  │  ├── AuthService (JWT, Password Hashing)               │   │
+│  │  ├── CandidateService (Data Processing)                │   │
+│  │  ├── MLService (Model Inference)                       │   │
+│  │  └── AnalyticsService (Metrics Calculation)            │   │
+│  └──────────────────────┬──────────────────────────────────┘   │
+│                         │                                       │
+│  ┌──────────────────────↓──────────────────────────────────┐   │
+│  │  Repositories (Data Access Layer)                       │   │
+│  │  ├── UserRepository                                     │   │
+│  │  ├── CandidateRepository                                │   │
+│  │  └── JobRepository                                      │   │
+│  └──────────────────────┬──────────────────────────────────┘   │
+└─────────────────────────┼────────────────────────────────────────┘
+                         │ SQL Queries
+                         ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    DATABASE LAYER                               │
+│                  (MySQL 8.0)                                    │
+│                                                                 │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐         │
+│  │  users   │ │candidates│ │   jobs   │ │interviews│         │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘         │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                   ML INFERENCE ENGINE                           │
+│              (Python + TypeScript Models)                       │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  DEV-01: Baseline Model                                 │   │
+│  │  └── Logistic Regression (84.7% accuracy)              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  DEV-02: Core ML Model                                  │   │
+│  │  └── Random Forest (92.5% accuracy)                    │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  DEV-03: Explainability                                 │   │
+│  │  └── SHAP Analysis & Feature Importance                │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+
+
+DATA FLOW EXAMPLE - Resume Screening:
+═════════════════════════════════════════════════════════════════
+
+1. Client Request
+   POST /api/candidates
+   {
+     "name": "John Doe",
+     "email": "john@example.com",
+     "resume_text": "...",
+     "job_id": "job-123"
+   }
+   ↓
+2. Backend Processing
+   - Validate input (Zod schema)
+   - Parse resume data
+   - Extract features
+   ↓
+3. ML Inference
+   - Pass features to Random Forest model
+   - Generate predictions & scores
+   ↓
+4. Database Storage
+   - Store candidate record
+   - Save AI scores
+   - Log activity
+   ↓
+5. Client Response
+   200 OK
+   {
+     "id": "cand-456",
+     "name": "John Doe",
+     "ai_score": 92.5,
+     "status": "applied",
+     "applied_at": "2026-10-08T..."
+   }
+
+
+SYSTEM COMPONENTS:
+═════════════════════════════════════════════════════════════════
+
+Frontend Layer (React 18 + TypeScript)
+  - User interface for candidates and admins
+  - Real-time data sync with refresh buttons
+  - Form validation and error handling
+  - Charts and analytics visualization
+
+API Gateway (Express.js)
+  - Request routing and middleware
+  - JWT authentication
+  - Input validation (Zod schemas)
+  - Error handling and response formatting
+  - CORS and security headers (Helmet)
+
+Service Layer
+  - Business logic implementation
+  - ML model coordination
+  - Data transformation
+  - Analytics computation
+
+Repository Layer
+  - Database abstraction
+  - SQL query execution
+  - Connection pooling
+  - Transaction management
+
+Database (MySQL 8.0)
+  - Persistent data storage
+  - Relational schema with proper indexing
+  - Support for complex queries
+  - Data integrity constraints
+
+ML Inference Engine
+  - Resume parsing and feature extraction
+  - Model predictions (Random Forest 92.5% accuracy)
+  - Explainability analysis (SHAP)
+  - Score normalization and calibration

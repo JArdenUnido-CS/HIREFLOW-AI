@@ -1,0 +1,109 @@
+/*
+  FIGURE 13: API RESPONSE EXAMPLE
+  201 Created Response with ML Inference Results
+  
+  This response shows a successful candidate creation with:
+  - Candidate profile stored in database
+  - Resume parsed and analyzed
+  - ML model inference results (92.5% accuracy)
+  - Match scoring against job requirements
+*/
+
+{
+  "id": "cand-5f7b9a2c",
+  "name": "Jane Smith",
+  "email": "jane.smith@email.com",
+  "phone": "+1-555-0123",
+  "location": "San Francisco, CA",
+  "linkedin": "https://linkedin.com/in/janesmith",
+  "github": "https://github.com/janesmith",
+  "portfolio": "https://janesmith.dev",
+  "photo_url": null,
+  
+  "resume_url": "https://drive.google.com/file/d/resume.pdf",
+  "resume_text": "Senior Software Engineer with 5+ years experience in full-stack development. Proficient in React, Node.js, TypeScript, Python, and AWS cloud technologies. Certified AWS Solutions Architect and Kubernetes Administrator. Passionate about building scalable applications and mentoring junior developers.",
+  
+  "parsed_data": {
+    "experience_years": 5,
+    "education": "BS Computer Science",
+    "certifications": [
+      "AWS Solutions Architect",
+      "Kubernetes Administrator"
+    ],
+    "skills": [
+      "React",
+      "Node.js",
+      "TypeScript",
+      "Python",
+      "AWS",
+      "Kubernetes",
+      "PostgreSQL",
+      "Docker",
+      "GraphQL",
+      "REST APIs"
+    ],
+    "languages": ["English", "Spanish"],
+    "companies": ["TechCorp Inc.", "StartupXYZ", "CloudServices Ltd."]
+  },
+  
+  "ai_scores": {
+    "overall_score": 92.5,
+    "skill_match": 94.2,
+    "experience_match": 89.8,
+    "education_match": 88.5,
+    "model_type": "Random Forest (DEV-02)",
+    "baseline_model_accuracy": 84.7,
+    "model_improvement": "9.21%",
+    "confidence": 0.927,
+    "inference_time_ms": 78,
+    "feature_extraction_time_ms": 35,
+    "prediction_probability": {
+      "excellent_fit": 0.92,
+      "good_fit": 0.07,
+      "poor_fit": 0.01
+    }
+  },
+  
+  "match_scores": {
+    "job_id": "job-frontend-2026-10",
+    "job_title": "Senior Frontend Engineer",
+    "job_department": "Engineering",
+    "match_percentage": 92.5,
+    "rank": 1,
+    "total_candidates_for_job": 1,
+    
+    "strengths": [
+      "Expert in React (5+ years of experience)",
+      "Strong TypeScript skills (modern development)",
+      "AWS cloud architecture experience",
+      "Leadership and mentoring background",
+      "Relevant certifications (AWS SA, K8s)"
+    ],
+    
+    "gaps": [
+      "Limited Vue.js framework experience",
+      "No GraphQL mentioned in resume",
+      "Experience primarily in startups vs enterprise"
+    ],
+    
+    "recommendations": [
+      "Candidate is highly qualified for role",
+      "Consider for senior/lead positions",
+      "Could mentor junior developers",
+      "Recommend moving to interview stage"
+    ]
+  },
+  
+  "status": "applied",
+  "job_id": "job-frontend-2026-10",
+  "applied_at": "2026-10-08T21:35:42.123Z",
+  "created_at": "2026-10-08T21:35:42.123Z",
+  "updated_at": "2026-10-08T21:35:42.123Z",
+  
+  "metadata": {
+    "source": "external_application",
+    "ip_address": "192.168.1.100",
+    "user_agent": "Mozilla/5.0 (React/Axios)",
+    "request_id": "req-2026-10-08-001"
+  }
+}
