@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Video, MessageSquare, Brain, Sparkles, MapPin, Mail, Phone, ExternalLink, X, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Video, MessageSquare, Brain, Sparkles, MapPin, Mail, Phone, ExternalLink, X, Trash2, RotateCw } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -40,6 +40,7 @@ export function InterviewsPage() {
   const [loading, setLoading] = useState(true);
   const [deleteInterviewId, setDeleteInterviewId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchInterviews = async () => {
     try {
@@ -59,6 +60,18 @@ export function InterviewsPage() {
       setCandidates(response.data.candidates || []);
     } catch (error) {
       console.error('Failed to fetch candidates:', error);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([fetchInterviews(), fetchCandidates()]);
+      toast.success('Data refreshed successfully');
+    } catch (error) {
+      toast.error('Failed to refresh data');
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -95,9 +108,19 @@ export function InterviewsPage() {
             <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Interviews</h1>
             <p className="text-surface-500 mt-1">Schedule and manage candidate interviews</p>
           </div>
-          <Button variant="primary" icon={<Calendar size={16} />} onClick={() => setShowScheduleModal(true)}>
-            Schedule Interview
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="secondary" 
+              icon={<RotateCw size={16} />} 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            <Button variant="primary" icon={<Calendar size={16} />} onClick={() => setShowScheduleModal(true)}>
+              Schedule Interview
+            </Button>
+          </div>
         </div>
 
         {/* Upcoming interviews */}

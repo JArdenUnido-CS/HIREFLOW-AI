@@ -1,18 +1,41 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronDown, Brain, Target, Award, TrendingUp } from 'lucide-react';
+import { Sparkles, ChevronDown, Brain, Target, Award, TrendingUp, RotateCw } from 'lucide-react';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
 import { ScoreCard } from '@/components/shared/ScoreCard';
 import { RadialProgress } from '@/components/shared/RadialProgress';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
 import { sampleCandidates } from '@/data/sampleData';
 import { cn, getScoreColor } from '@/lib/utils';
+import { candidatesApi } from '@/services/api';
+import toast from 'react-hot-toast';
 
 export function AnalysisPage() {
   const [selectedCandidate, setSelectedCandidate] = useState(sampleCandidates[0]);
+  const [allCandidates, setAllCandidates] = useState(sampleCandidates);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await candidatesApi.getAll({ limit: 1000 });
+      const apiCandidates = response.data.candidates || [];
+      if (apiCandidates.length > 0) {
+        setAllCandidates(apiCandidates);
+        setSelectedCandidate(apiCandidates[0]);
+      }
+      toast.success('Analysis data refreshed');
+    } catch (error) {
+      toast.error('Failed to refresh analysis data');
+      console.error(error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const radarData = [
     { subject: 'Technical', value: selectedCandidate.aiScores.technical },
@@ -37,21 +60,32 @@ export function AnalysisPage() {
             <p className="text-surface-500 mt-1">Deep AI-powered insights for each candidate</p>
           </div>
 
-          {/* Candidate Selector */}
-          <div className="relative">
-            <select
-              value={selectedCandidate.id}
-              onChange={(e) => {
-                const c = sampleCandidates.find((c) => c.id === e.target.value);
-                if (c) setSelectedCandidate(c);
-              }}
-              className="appearance-none px-4 py-2.5 pr-10 rounded-xl bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-sm font-medium text-surface-800 dark:text-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+          {/* Candidate Selector and Refresh */}
+          <div className="flex gap-2 items-center">
+            <div className="relative">
+              <select
+                value={selectedCandidate.id}
+                onChange={(e) => {
+                  const c = allCandidates.find((c) => c.id === e.target.value);
+                  if (c) setSelectedCandidate(c);
+                }}
+                className="appearance-none px-4 py-2.5 pr-10 rounded-xl bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 text-sm font-medium text-surface-800 dark:text-surface-200 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+              >
+                {allCandidates.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 pointer-events-none" />
+            </div>
+            <Button 
+              variant="secondary" 
+              icon={<RotateCw size={16} />} 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              size="sm"
             >
-              {sampleCandidates.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 pointer-events-none" />
+              {isRefreshing ? 'Refreshing...' : 'Refresh'}
+            </Button>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Briefcase } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, RotateCw } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -8,6 +8,8 @@ import { Modal } from '@/components/ui/Modal';
 import { PageTransition } from '@/components/shared/PageTransition';
 import { sampleCandidates, sampleJobs } from '@/data/sampleData';
 import { cn, getScoreColor } from '@/lib/utils';
+import { candidatesApi } from '@/services/api';
+import toast from 'react-hot-toast';
 import type { Candidate, PipelineStage } from '@/types';
 
 const stages: { id: PipelineStage; label: string; color: string }[] = [
@@ -25,6 +27,27 @@ export function PipelinePage() {
   const [draggedCandidate, setDraggedCandidate] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const response = await candidatesApi.getAll({ limit: 1000 });
+      const apiCandidates = response.data.candidates || [];
+      // Map API candidates to match the Candidate type structure
+      setCandidates(apiCandidates.map((c: any) => ({
+        ...c,
+        status: c.status || 'applied',
+        jobId: c.jobId || sampleCandidates[0]?.jobId || '1',
+      })));
+      toast.success('Pipeline data refreshed');
+    } catch (error) {
+      toast.error('Failed to refresh pipeline data');
+      console.error(error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleDragStart = (candidateId: string) => {
     setDraggedCandidate(candidateId);
@@ -51,9 +74,19 @@ export function PipelinePage() {
   return (
     <PageTransition>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Recruitment Pipeline</h1>
-          <p className="text-surface-500 mt-1">Drag and drop candidates between stages</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Recruitment Pipeline</h1>
+            <p className="text-surface-500 mt-1">Drag and drop candidates between stages</p>
+          </div>
+          <Button 
+            variant="secondary" 
+            icon={<RotateCw size={16} />} 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
 
         {/* Kanban Board */}

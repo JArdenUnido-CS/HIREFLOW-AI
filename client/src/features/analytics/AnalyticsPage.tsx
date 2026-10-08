@@ -1,9 +1,13 @@
 import { motion } from 'framer-motion';
+import { RotateCw } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
 import { AnimatedCounter } from '@/components/shared/AnimatedCounter';
 import { hiringFunnelData, monthlyApplicationsData, topSkillsData } from '@/data/sampleData';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const departmentData = [
   { name: 'Engineering', value: 456, color: '#4c6ef5' },
@@ -21,12 +25,37 @@ const metrics = [
 ];
 
 export function AnalyticsPage() {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Simulate refresh (analytics uses static data in demo)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      toast.success('Analytics data refreshed');
+    } catch (error) {
+      toast.error('Failed to refresh analytics');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <PageTransition>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Analytics</h1>
-          <p className="text-surface-500 mt-1">Recruitment performance metrics and insights</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Analytics</h1>
+            <p className="text-surface-500 mt-1">Recruitment performance metrics and insights</p>
+          </div>
+          <Button 
+            variant="secondary" 
+            icon={<RotateCw size={16} />} 
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </div>
 
         {/* Key Metrics */}

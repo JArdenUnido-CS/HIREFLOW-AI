@@ -29,7 +29,7 @@ export function StaggerContainer({ children, className }: { children: React.Reac
           transition: { staggerChildren: 0.08 },
         },
       }}
-      className={className}
+      className={`overflow-visible ${className}`}
     >
       {children}
     </motion.div>

@@ -148,7 +148,7 @@ export function CandidatesPage() {
           <StaggerContainer className="space-y-3">
             {filteredCandidates.map((candidate) => (
               <StaggerItem key={candidate.id}>
-                <Card hover className="p-4">
+                <Card className="p-4 overflow-visible">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-surface-900 dark:text-white truncate">{candidate.name}</h3>
@@ -178,7 +178,7 @@ export function CandidatesPage() {
 
                         {/* Dropdown Menu */}
                         {openDropdown === candidate.id && (
-                          <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg z-10">
+                          <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-surface-800 border border-surface-300 dark:border-surface-700 rounded-lg shadow-lg z-50">
                             {Object.entries(statusLabels).map(([status, label]) => (
                               <button
                                 key={status}
