@@ -22,7 +22,8 @@ export function AnalysisPage() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      const response = await candidatesApi.getAll({ limit: 1000 });
+      // Add timestamp to bust cache
+      const response = await candidatesApi.getAll({ limit: 1000, t: Date.now() } as any);
       const apiCandidates = response.data.candidates || [];
       
       if (apiCandidates.length > 0) {

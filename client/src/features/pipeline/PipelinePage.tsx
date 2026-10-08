@@ -32,7 +32,8 @@ export function PipelinePage() {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      const response = await candidatesApi.getAll({ limit: 1000 });
+      // Add timestamp to bust cache
+      const response = await candidatesApi.getAll({ limit: 1000, t: Date.now() } as any);
       console.log('Candidates API response:', response);
       const apiCandidates = response.data.candidates || [];
       console.log('API Candidates (raw):', apiCandidates);
