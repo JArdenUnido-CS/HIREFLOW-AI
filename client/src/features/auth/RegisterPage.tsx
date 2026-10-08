@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export function RegisterPage() {
   const [step, setStep] = useState(1);
@@ -50,8 +51,18 @@ export function RegisterPage() {
   };
 
   const handleFinalSubmit = async () => {
-    await register(name, email, password);
-    navigate('/portal');
+    try {
+      await register(name, email, password);
+      toast.success('Account created successfully!');
+      // Redirect to candidate portal on successful registration
+      setTimeout(() => {
+        navigate('/portal');
+      }, 500);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
+      console.error('Registration failed:', error);
+      toast.error(message);
+    }
   };
 
   return (

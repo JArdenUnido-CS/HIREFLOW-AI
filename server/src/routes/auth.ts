@@ -39,12 +39,32 @@ router.post('/login', async (req, res) => {
 
 /**
  * POST /api/auth/register
- * Register a new user account
+ * Register a new user account (Candidate)
+ * Automatically creates a candidate record visible to admins
  */
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = registerSchema.parse(req.body);
+    
+    // Register user with 'candidate' role
     const authResponse = await AuthService.register(email, name, password, 'candidate');
+    
+    // Auto-create candidate record (visible to admin) - but don't block if it fails
+    try {
+      const { CandidateRepository } = await import('@/repositories/index.js');
+      const { generateId } = await import('@/utils/helpers.js');
+      
+      await CandidateRepository.create(generateId(), {
+        name,
+        email,
+        status: 'applied',
+        applied_at: new Date(),
+      });
+    } catch (candidateError) {
+      // Log but don't fail registration if candidate record creation fails
+      console.error('Failed to create candidate record:', candidateError);
+    }
+
     res.status(201).json(authResponse);
   } catch (error) {
     if (error instanceof z.ZodError) {

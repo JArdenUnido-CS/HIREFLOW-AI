@@ -8,8 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
 
 export function LoginPage() {
-  const [email, setEmail] = useState('JardenUnido@hireflow.ai');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error: authError } = useAuth();
   const navigate = useNavigate();
