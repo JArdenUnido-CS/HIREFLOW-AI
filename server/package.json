@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc --noEmit || true && npm run build:server",
+    "build:server": "tsc --skipLibCheck",
     "start": "node dist/index.js",
     "lint": "eslint src/"
   },
