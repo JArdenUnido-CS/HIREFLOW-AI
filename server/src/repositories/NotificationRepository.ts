@@ -1,5 +1,5 @@
 import { RowDataPacket } from 'mysql2/promise';
-import { query, queryOne, execute } from '@/utils/db.js';
+import { query, queryOne, execute } from '../utils/db.js';
 
 export interface INotification extends RowDataPacket {
   id: string;

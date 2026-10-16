@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import pool from '@/config/database.js';
+import pool from './config/database.js';
 import { authRouter } from './routes/auth.js';
 import { candidatesRouter } from './routes/candidates.js';
 import { jobsRouter } from './routes/jobs.js';

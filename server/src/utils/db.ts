@@ -1,5 +1,5 @@
 import { RowDataPacket, OkPacket } from 'mysql2/promise';
-import pool from '@/config/database.js';
+import pool from '../config/database.js';
 
 /**
  * Execute a SELECT query

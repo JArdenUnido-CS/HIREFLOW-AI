@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { JobRepository } from '@/repositories/index.js';
-import { ActivityRepository } from '@/repositories/index.js';
-import { authenticate, requireRole } from '@/middleware/auth.js';
-import { generateId } from '@/utils/helpers.js';
+import { JobRepository } from './repositories/index.js';
+import { ActivityRepository } from './repositories/index.js';
+import { authenticate, requireRole } from './middleware/auth.js';
+import { generateId } from './utils/helpers.js';
 
 const router = Router();
 

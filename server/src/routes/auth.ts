@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { AuthService } from '@/services/AuthService.js';
-import { authenticate } from '@/middleware/auth.js';
+import { AuthService } from '../services/AuthService.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -51,8 +51,8 @@ router.post('/register', async (req, res) => {
     
     // Auto-create candidate record (visible to admin) - but don't block if it fails
     try {
-      const { CandidateRepository } = await import('@/repositories/index.js');
-      const { generateId } = await import('@/utils/helpers.js');
+      const { CandidateRepository } = await import('../repositories/index.js');
+      const { generateId } = await import('../utils/helpers.js');
       
       await CandidateRepository.create(generateId(), {
         name,

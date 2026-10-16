@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { UserRepository } from '@/repositories/index.js';
-import { generateId } from '@/utils/helpers.js';
+import { UserRepository } from '../repositories/index.js';
+import { generateId } from '../utils/helpers.js';
 
 export interface TokenPayload {
   userId: string;

@@ -1,6 +1,6 @@
 import { RowDataPacket } from 'mysql2/promise';
-import { query, queryOne, execute } from '@/utils/db.js';
-import { safeJsonParse, safeJsonStringify } from '@/utils/helpers.js';
+import { query, queryOne, execute } from '../utils/db.js';
+import { safeJsonParse, safeJsonStringify } from '../utils/helpers.js';
 
 export interface IInterview extends RowDataPacket {
   id: string;
