@@ -56,10 +56,15 @@ process.on('SIGINT', async () => {
   console.log('\n✓ Shutting down gracefully...');
   server.close(() => {
     console.log('✓ Server closed');
-    pool.end(() => {
-      console.log('✓ Database pool closed');
+    if (pool && typeof pool.end === 'function') {
+      pool.end(() => {
+        console.log('✓ Database pool closed');
+        process.exit(0);
+      });
+    } else {
+      console.log('✓ Database closed');
       process.exit(0);
-    });
+    }
   });
 });
 
