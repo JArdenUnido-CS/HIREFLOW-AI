@@ -237,7 +237,7 @@ export function InterviewsPage() {
                     <h3 className="text-lg font-bold text-surface-900 dark:text-white">
                       {candidate?.name || 'Unknown Candidate'}
                     </h3>
-                    <p className="text-sm text-surface-500">Job ID: {selectedInterview.jobId}</p>
+                    <p className="text-sm text-surface-500">Interview ID: {selectedInterview.id}</p>
                     {candidate && (
                       <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-surface-500">
                         <span className="flex items-center gap-1"><Mail size={12} />{candidate.email}</span>

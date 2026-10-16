@@ -242,4 +242,5 @@ export function getErrorMessage(error: unknown): string {
   return 'An unknown error occurred';
 }
 
+export { apiClient as api };
 export default apiClient;
