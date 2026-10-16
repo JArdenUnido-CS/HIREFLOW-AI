@@ -1,77 +1,64 @@
-import { RowDataPacket, OkPacket } from 'mysql2/promise';
-import pool from '../config/database.js';
+/**
+ * Mock Database Query Layer
+ * Simulates SQL queries using in-memory mock data
+ */
+
+import { mockDB, getMockData, getMockDataOne } from '../config/database.js';
 
 /**
- * Execute a SELECT query
+ * Execute a SELECT query (returns array)
  */
-export async function query<T extends RowDataPacket[]>(
+export async function query<T extends any[]>(
   sql: string,
   values?: any[]
 ): Promise<T> {
-  try {
-    const connection = await pool.getConnection();
-    try {
-      const [rows] = await connection.execute(sql, values);
-      return rows as T;
-    } finally {
-      connection.release();
-    }
-  } catch (error) {
-    console.error('Database query error:', error);
-    throw error;
+  // Parse simple SELECT queries
+  if (sql.includes('FROM users')) {
+    return getMockData('users') as T;
+  } else if (sql.includes('FROM jobs')) {
+    return getMockData('jobs') as T;
+  } else if (sql.includes('FROM candidates')) {
+    return getMockData('candidates') as T;
+  } else if (sql.includes('FROM interviews')) {
+    return getMockData('interviews') as T;
   }
+  return [] as T;
 }
 
 /**
- * Execute an INSERT, UPDATE, or DELETE query
+ * Execute an INSERT, UPDATE, or DELETE (mock implementation)
  */
 export async function execute(
   sql: string,
   values?: any[]
-): Promise<OkPacket> {
-  try {
-    const connection = await pool.getConnection();
-    try {
-      const [result] = await connection.execute(sql, values);
-      return result as OkPacket;
-    } finally {
-      connection.release();
-    }
-  } catch (error) {
-    console.error('Database execute error:', error);
-    throw error;
-  }
-}
-
-/**
- * Execute a transaction
- */
-export async function transaction<T>(
-  callback: (connection: any) => Promise<T>
-): Promise<T> {
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    const result = await callback(connection);
-    await connection.commit();
-    return result;
-  } catch (error) {
-    await connection.rollback();
-    throw error;
-  } finally {
-    connection.release();
-  }
+): Promise<any> {
+  // Mock successful execution
+  return {
+    affectedRows: 1,
+    insertId: Math.random().toString(36).substr(2, 9),
+  };
 }
 
 /**
  * Get single row from query
  */
-export async function queryOne<T extends RowDataPacket>(
+export async function queryOne<T extends any>(
   sql: string,
   values?: any[]
 ): Promise<T | null> {
-  const results = await query<T[]>(sql, values);
-  return results.length > 0 ? results[0] : null;
+  // Parse simple SELECT queries
+  if (sql.includes('FROM users') && sql.includes('WHERE')) {
+    if (sql.includes('email')) {
+      const email = values?.[0];
+      const user = getMockDataOne('users', { email });
+      return user as T | null;
+    } else if (sql.includes('id')) {
+      const id = values?.[0];
+      const user = getMockDataOne('users', { id });
+      return user as T | null;
+    }
+  }
+  return null;
 }
 
 /**
@@ -80,4 +67,13 @@ export async function queryOne<T extends RowDataPacket>(
 export async function exists(sql: string, values?: any[]): Promise<boolean> {
   const result = await queryOne(sql, values);
   return !!result;
+}
+
+/**
+ * Execute a transaction (mock)
+ */
+export async function transaction<T>(
+  callback: (connection: any) => Promise<T>
+): Promise<T> {
+  return callback(null);
 }
