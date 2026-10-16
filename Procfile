@@ -1,1 +1,1 @@
-web: npm run build --workspace=server && npm start --workspace=server
+web: npx tsx server/src/index.ts
