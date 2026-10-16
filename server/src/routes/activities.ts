@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { ActivityRepository } from './repositories/index.js';
-import { authenticate } from './middleware/auth.js';
+import { ActivityRepository } from '../repositories/index.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 

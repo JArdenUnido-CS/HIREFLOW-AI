@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { NotificationRepository } from './repositories/index.js';
-import { authenticate } from './middleware/auth.js';
-import { generateId } from './utils/helpers.js';
+import { NotificationRepository } from '../repositories/index.js';
+import { authenticate } from '../middleware/auth.js';
+import { generateId } from '../utils/helpers.js';
 
 const router = Router();
 
