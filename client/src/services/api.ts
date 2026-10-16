@@ -1,11 +1,72 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import { mockApi } from './mockApi';
 
 const API_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:3001/api';
 
+// DEMO MODE: Return mock data for all requests
+const USE_MOCK_ONLY = true;
+
+// Create a mock axios instance that returns mock data
+const createMockApiClient = (): AxiosInstance => {
+  const mockClient: any = axios.create({
+    baseURL: API_URL,
+    timeout: 1000,
+  });
+
+  mockClient.interceptors.request.use(async (config: any) => {
+    // Map API endpoints to mock data
+    const url = config.url || '';
+    
+    if (url.includes('/login') || url.includes('/auth/login')) {
+      config.mockData = await mockApi.login('demo@example.com', 'demo');
+    } else if (url.includes('/register')) {
+      config.mockData = await mockApi.register('Demo', 'demo@example.com', 'demo');
+    } else if (url.includes('/candidates')) {
+      config.mockData = await mockApi.getCandidates();
+    } else if (url.includes('/jobs')) {
+      config.mockData = await mockApi.getJobs();
+    } else if (url.includes('/interviews')) {
+      config.mockData = await mockApi.getInterviews();
+    } else if (url.includes('/analytics') || url.includes('/analysis')) {
+      config.mockData = await mockApi.getAnalytics();
+    } else if (url.includes('/pipeline')) {
+      config.mockData = await mockApi.getPipeline();
+    } else {
+      config.mockData = await mockApi.fallback();
+    }
+    
+    return config;
+  });
+
+  mockClient.interceptors.response.use(
+    (response: any) => {
+      if (response.config.mockData) {
+        return { ...response, data: response.config.mockData };
+      }
+      return response;
+    },
+    (error: any) => {
+      // Always return mock data on error
+      if (error.config?.mockData) {
+        return Promise.resolve({ 
+          data: error.config.mockData,
+          status: 200,
+          statusText: 'OK (MOCK)',
+          headers: {},
+          config: error.config,
+        });
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return mockClient;
+};
+
 // Create axios instance
-const apiClient: AxiosInstance = axios.create({
+const apiClient: AxiosInstance = USE_MOCK_ONLY ? createMockApiClient() : axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache, no-store, must-revalidate',
