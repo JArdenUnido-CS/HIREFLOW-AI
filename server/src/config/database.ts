@@ -21,8 +21,6 @@ if (isMongoDb) {
         ssl: true,
         retryWrites: true,
         w: 'majority',
-        tlsAllowInvalidCertificates: false,
-        tlsInsecure: false,
       });
       await mongoClient.connect();
       mongoDb = mongoClient.db('hireflow_ai');
