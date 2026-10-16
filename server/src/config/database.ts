@@ -1,5 +1,5 @@
-import mysql from 'mysql2/promise';
 import { MongoClient, Db } from 'mongodb';
+import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -12,12 +12,17 @@ let mongoDb: Db;
 let mongoClient: MongoClient;
 
 if (isMongoDb) {
-  // MongoDB Connection
+  // MongoDB Connection with SSL support
   async function connectMongoDB() {
     try {
       mongoClient = new MongoClient(DATABASE_URL!, {
         maxPoolSize: 10,
         minPoolSize: 2,
+        ssl: true,
+        retryWrites: true,
+        w: 'majority',
+        tlsAllowInvalidCertificates: false,
+        tlsInsecure: false,
       });
       await mongoClient.connect();
       mongoDb = mongoClient.db('hireflow_ai');
@@ -25,7 +30,11 @@ if (isMongoDb) {
       return mongoDb;
     } catch (error) {
       console.error('✗ Database connection failed:', error instanceof Error ? error.message : String(error));
-      setTimeout(() => process.exit(1), 5000);
+      // Retry on SSL issues - sometimes MongoDB Atlas needs a moment
+      setTimeout(() => {
+        console.log('Retrying MongoDB connection...');
+        connectMongoDB();
+      }, 5000);
     }
   }
   connectMongoDB();
