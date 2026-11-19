@@ -71,8 +71,8 @@ router.get('/', authenticate, async (req, res) => {
     let candidates;
 
     if (req.user?.role === 'employer') {
-      // Employers see only their own candidates
-      candidates = await CandidateRepository.findByEmployer(req.userId!, limit, offset, status);
+      // Employers see all candidates for now (demo/testing)
+      candidates = await CandidateRepository.findAll(limit, offset, status);
     } else if (req.user?.role === 'client') {
       // Clients see only their own profile
       if (emailFilter && emailFilter === req.user.email) {
