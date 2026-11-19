@@ -33,30 +33,55 @@ export function AnalysisPage() {
       
       // Map from snake_case to camelCase and filter for candidates with AI scores
       const mapped = apiCandidates
-        .filter((c: any) => c.ai_scores && Object.keys(c.ai_scores).length > 0)
-        .map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          email: c.email,
-          phone: c.phone,
-          location: c.location,
-          linkedin: c.linkedin,
-          github: c.github,
-          portfolio: c.portfolio,
-          photoUrl: c.photo_url,
-          resumeUrl: c.resume_url,
-          resumeText: c.resume_text,
-          parsedData: c.parsed_data || {},
-          aiScores: c.ai_scores,
-          matchScores: c.match_scores || {},
-          status: c.status || 'applied',
-          jobId: c.job_id,
-          appliedAt: c.applied_at,
-          createdAt: c.created_at,
-          updatedAt: c.updated_at,
-        }));
+        .filter((c: any) => {
+          // Check if ai_scores exists and has content
+          if (!c.ai_scores) return false;
+          if (typeof c.ai_scores === 'string') {
+            try {
+              const parsed = JSON.parse(c.ai_scores);
+              return parsed && Object.keys(parsed).length > 0;
+            } catch {
+              return false;
+            }
+          }
+          return Object.keys(c.ai_scores).length > 0;
+        })
+        .map((c: any) => {
+          // Parse ai_scores if it's a string
+          let aiScores = c.ai_scores;
+          if (typeof aiScores === 'string') {
+            try {
+              aiScores = JSON.parse(aiScores);
+            } catch {
+              aiScores = {};
+            }
+          }
+          
+          return {
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            location: c.location,
+            linkedin: c.linkedin,
+            github: c.github,
+            portfolio: c.portfolio,
+            photoUrl: c.photo_url,
+            resumeUrl: c.resume_url,
+            resumeText: c.resume_text,
+            parsedData: c.parsed_data || {},
+            aiScores: aiScores,
+            matchScores: c.match_scores || {},
+            status: c.status || 'applied',
+            jobId: c.job_id,
+            appliedAt: c.applied_at,
+            createdAt: c.created_at,
+            updatedAt: c.updated_at,
+          };
+        });
       
       console.log('AnalysisPage: Mapped candidates with AI scores:', mapped);
+      console.log('AnalysisPage: Total candidates with AI scores:', mapped.length);
       
       setAllCandidates(mapped);
       if (mapped.length > 0) {
