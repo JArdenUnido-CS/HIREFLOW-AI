@@ -29,6 +29,8 @@ export function AnalysisPage() {
       const response = await candidatesApi.getAll({ limit: 1000 });
       const apiCandidates = response.data.candidates || [];
       
+      console.log('AnalysisPage: Raw candidates from API:', apiCandidates);
+      
       // Map from snake_case to camelCase and filter for candidates with AI scores
       const mapped = apiCandidates
         .filter((c: any) => c.ai_scores && Object.keys(c.ai_scores).length > 0)
@@ -53,6 +55,8 @@ export function AnalysisPage() {
           createdAt: c.created_at,
           updatedAt: c.updated_at,
         }));
+      
+      console.log('AnalysisPage: Mapped candidates with AI scores:', mapped);
       
       setAllCandidates(mapped);
       if (mapped.length > 0) {
