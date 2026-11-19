@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Mail, Phone, MapPin, ChevronDown, Trash2 } from 'lucide-react';
+import { Search, Plus, Mail, Phone, MapPin, ChevronDown, Trash2, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -40,6 +40,7 @@ export function CandidatesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -58,8 +59,29 @@ export function CandidatesPage() {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      setRefreshing(true);
+      const response = await candidatesApi.getAll({ limit: 1000 });
+      setCandidates(response.data.candidates || []);
+      toast.success('Candidates refreshed');
+    } catch (error) {
+      console.error('Failed to refresh candidates:', error);
+      toast.error('Failed to refresh candidates');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetchCandidates();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchCandidates();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusChange = async (candidateId: string, newStatus: string) => {
@@ -122,9 +144,20 @@ export function CandidatesPage() {
             <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Candidates</h1>
             <p className="text-surface-500 mt-1">{candidates.length} total candidates</p>
           </div>
-          <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowAddModal(true)}>
-            Add Candidate
-          </Button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 hover:bg-surface-50 dark:hover:bg-surface-800 text-surface-900 dark:text-white font-medium flex items-center gap-2 transition-all disabled:opacity-50"
+              title="Refresh candidate data (auto-refreshes every 30 seconds)"
+            >
+              <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+            <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowAddModal(true)}>
+              Add Candidate
+            </Button>
+          </div>
         </div>
 
         {/* Search */}
