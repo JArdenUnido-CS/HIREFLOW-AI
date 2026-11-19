@@ -27,11 +27,11 @@ export function PersonalInfoSection({ cv, setCV }: PersonalInfoSectionProps) {
             </label>
             <input
               type="text"
-              value={user?.name || ''}
-              disabled
-              className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-surface-50 dark:bg-surface-700 text-surface-900 dark:text-white disabled:opacity-50"
+              value={cv.name || user?.name || ''}
+              onChange={(e) => setCV({ ...cv, name: e.target.value })}
+              className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white"
             />
-            <p className="text-xs text-surface-500 mt-1">From your account profile</p>
+            <p className="text-xs text-surface-500 mt-1">Edit your name as it appears on your CV</p>
           </div>
 
           <div>

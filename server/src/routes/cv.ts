@@ -83,6 +83,7 @@ const projectSchema = z.object({
 );
 
 const cvDataSchema = z.object({
+  name: z.string().optional(),
   summary: z.string().min(0, 'Professional summary').optional().default(''),
   phone: z.string().optional(),
   location: z.string().optional(),

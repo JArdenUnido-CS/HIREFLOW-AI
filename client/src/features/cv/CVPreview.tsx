@@ -12,7 +12,7 @@ export function CVPreview({ cv }: CVPreviewProps) {
     <div className="max-w-4xl mx-auto bg-white dark:bg-surface-800 rounded-lg shadow-lg p-12 print:shadow-none print:p-0">
       {/* Header */}
       <div className="mb-8 pb-6 border-b-2 border-surface-200 dark:border-surface-700">
-        <h1 className="text-4xl font-bold text-surface-900 dark:text-white mb-2">{user?.name || 'Your Name'}</h1>
+        <h1 className="text-4xl font-bold text-surface-900 dark:text-white mb-2">{cv.name || user?.name || 'Your Name'}</h1>
         <div className="flex flex-wrap gap-4 text-sm text-surface-600 dark:text-surface-400">
           {user?.email && <span>{user.email}</span>}
           {cv.phone && <span>{cv.phone}</span>}

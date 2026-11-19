@@ -13,6 +13,7 @@ import { ProjectsSection } from './sections/ProjectsSection';
 import { CVPreview } from './CVPreview';
 
 export interface ParsedCV {
+  name?: string;
   summary: string;
   phone?: string;
   location?: string;
@@ -36,6 +37,7 @@ interface CVBuilderProps {
 export function CVBuilder({ candidateId: initialCandidateId, onSave }: CVBuilderProps) {
   const { user } = useAuthStore();
   const [cv, setCV] = useState<ParsedCV>({
+    name: user?.name || '',
     summary: '',
     phone: '',
     location: '',
@@ -99,6 +101,7 @@ export function CVBuilder({ candidateId: initialCandidateId, onSave }: CVBuilder
         const parsedData = data.parsed_data || cv;
         
         setCV({
+          name: parsedData.name || user?.name || '',
           summary: parsedData.summary || '',
           phone: parsedData.phone || '',
           location: parsedData.location || '',
