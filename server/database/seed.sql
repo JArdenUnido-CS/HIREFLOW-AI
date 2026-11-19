@@ -121,7 +121,7 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
 -- =============================================================================
 
 INSERT INTO candidates (
-  id, name, email, phone, location, linkedin, github, portfolio, status, job_id, applied_at, parsed_data
+  id, name, email, phone, location, linkedin, github, portfolio, status, job_id, applied_at, parsed_data, ai_scores
 ) VALUES
 (
   'cand_01',
@@ -719,6 +719,138 @@ INSERT INTO candidates (
     'totalYearsExperience', 3
   )
 );
+
+-- =============================================================================
+-- Add AI Scores to Sample Candidates
+-- =============================================================================
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 88,
+  'technical', 92,
+  'experience', 85,
+  'leadership', 80,
+  'communication', 85,
+  'problemSolving', 90,
+  'teamwork', 82,
+  'learningPotential', 88,
+  'atsCompatibility', 91,
+  'strengths', JSON_ARRAY('Strong React expertise', 'Excellent communication skills', 'Proven mentorship track record'),
+  'weaknesses', JSON_ARRAY('Limited backend experience', 'Could improve DevOps knowledge'),
+  'recommendations', JSON_ARRAY('Strong fit for senior frontend roles', 'Consider adding DevOps skills for growth'),
+  'confidenceLevel', 92
+) WHERE id = 'cand_01';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 85,
+  'technical', 88,
+  'experience', 84,
+  'leadership', 78,
+  'communication', 80,
+  'problemSolving', 87,
+  'teamwork', 82,
+  'learningPotential', 85,
+  'atsCompatibility', 89,
+  'strengths', JSON_ARRAY('Expert in system design', 'Strong DevOps capabilities', 'Excellent problem solver'),
+  'weaknesses', JSON_ARRAY('Limited frontend knowledge', 'Could improve documentation habits'),
+  'recommendations', JSON_ARRAY('Excellent backend engineer', 'Consider full-stack development path'),
+  'confidenceLevel', 90
+) WHERE id = 'cand_02';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 82,
+  'technical', 78,
+  'experience', 80,
+  'leadership', 85,
+  'communication', 88,
+  'problemSolving', 80,
+  'teamwork', 84,
+  'learningPotential', 82,
+  'atsCompatibility', 85,
+  'strengths', JSON_ARRAY('Design systems expert', 'Strong user research skills', 'Accessibility advocate'),
+  'weaknesses', JSON_ARRAY('Limited coding skills', 'Could improve technical depth'),
+  'recommendations', JSON_ARRAY('Perfect fit for design-focused roles', 'Consider learning frontend development'),
+  'confidenceLevel', 88
+) WHERE id = 'cand_03';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 89,
+  'technical', 94,
+  'experience', 83,
+  'leadership', 75,
+  'communication', 82,
+  'problemSolving', 95,
+  'teamwork', 80,
+  'learningPotential', 91,
+  'atsCompatibility', 92,
+  'strengths', JSON_ARRAY('Advanced ML expertise', 'Strong research background', 'Excellent problem solver'),
+  'weaknesses', JSON_ARRAY('Limited leadership experience', 'Could improve communication'),
+  'recommendations', JSON_ARRAY('Top candidate for ML roles', 'Consider leadership track if interested'),
+  'confidenceLevel', 94
+) WHERE id = 'cand_04';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 78,
+  'technical', 82,
+  'experience', 75,
+  'leadership', 70,
+  'communication', 78,
+  'problemSolving', 80,
+  'teamwork', 76,
+  'learningPotential', 85,
+  'atsCompatibility', 80,
+  'strengths', JSON_ARRAY('Fast learner', 'Good fundamentals', 'Motivated professional'),
+  'weaknesses', JSON_ARRAY('Limited experience', 'Could improve advanced skills'),
+  'recommendations', JSON_ARRAY('Good for junior/mid-level roles', 'Strong potential with mentoring'),
+  'confidenceLevel', 80
+) WHERE id = 'cand_05';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 87,
+  'technical', 85,
+  'experience', 89,
+  'leadership', 88,
+  'communication', 86,
+  'problemSolving', 86,
+  'teamwork', 87,
+  'learningPotential', 84,
+  'atsCompatibility', 88,
+  'strengths', JSON_ARRAY('Senior-level experience', 'Strong leadership skills', 'Proven track record'),
+  'weaknesses', JSON_ARRAY('May need modern tech refresher'),
+  'recommendations', JSON_ARRAY('Excellent for senior positions', 'Ready for team lead role'),
+  'confidenceLevel', 91
+) WHERE id = 'cand_06';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 91,
+  'technical', 96,
+  'experience', 85,
+  'leadership', 82,
+  'communication', 88,
+  'problemSolving', 94,
+  'teamwork', 85,
+  'learningPotential', 89,
+  'atsCompatibility', 95,
+  'strengths', JSON_ARRAY('PhD researcher', 'Published author', 'Deep ML expertise'),
+  'weaknesses', JSON_ARRAY('Limited industry experience'),
+  'recommendations', JSON_ARRAY('Exceptional ML researcher', 'Perfect for research teams'),
+  'confidenceLevel', 96
+) WHERE id = 'cand_07';
+
+UPDATE candidates SET ai_scores = JSON_OBJECT(
+  'overall', 76,
+  'technical', 72,
+  'experience', 74,
+  'leadership', 70,
+  'communication', 76,
+  'problemSolving', 74,
+  'teamwork', 72,
+  'learningPotential', 78,
+  'atsCompatibility', 74,
+  'strengths', JSON_ARRAY('Strong design fundamentals', 'Creative thinker'),
+  'weaknesses', JSON_ARRAY('Limited user research experience', 'Could improve depth'),
+  'recommendations', JSON_ARRAY('Consider design roles with mentoring'),
+  'confidenceLevel', 75
+) WHERE id = 'cand_08';
 
 -- =============================================================================
 -- Insert Sample Interviews
