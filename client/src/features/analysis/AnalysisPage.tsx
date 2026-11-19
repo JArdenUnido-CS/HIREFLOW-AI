@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronDown, Brain, Target, Award, TrendingUp, RotateCw } from 'lucide-react';
+import { Sparkles, ChevronDown, Brain, Target, Award, TrendingUp, RotateCw, Loader } from 'lucide-react';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -9,73 +9,111 @@ import { Button } from '@/components/ui/Button';
 import { ScoreCard } from '@/components/shared/ScoreCard';
 import { RadialProgress } from '@/components/shared/RadialProgress';
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
-import { sampleCandidates } from '@/data/sampleData';
 import { cn, getScoreColor } from '@/lib/utils';
 import { candidatesApi } from '@/services/api';
 import toast from 'react-hot-toast';
 
 export function AnalysisPage() {
-  const [selectedCandidate, setSelectedCandidate] = useState<any>(sampleCandidates.find(c => c.aiScores && Object.keys(c.aiScores).length > 0) || sampleCandidates[0]);
-  const [allCandidates, setAllCandidates] = useState(sampleCandidates.filter(c => c.aiScores && Object.keys(c.aiScores).length > 0));
+  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [allCandidates, setAllCandidates] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    loadCandidates();
+  }, []);
+
+  const loadCandidates = async () => {
+    setIsLoading(true);
+    try {
+      const response = await candidatesApi.getAll({ limit: 1000 });
+      const apiCandidates = response.data.candidates || [];
+      
+      // Map from snake_case to camelCase and filter for candidates with AI scores
+      const mapped = apiCandidates
+        .filter((c: any) => c.ai_scores && Object.keys(c.ai_scores).length > 0)
+        .map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone,
+          location: c.location,
+          linkedin: c.linkedin,
+          github: c.github,
+          portfolio: c.portfolio,
+          photoUrl: c.photo_url,
+          resumeUrl: c.resume_url,
+          resumeText: c.resume_text,
+          parsedData: c.parsed_data || {},
+          aiScores: c.ai_scores,
+          matchScores: c.match_scores || {},
+          status: c.status || 'applied',
+          jobId: c.job_id,
+          appliedAt: c.applied_at,
+          createdAt: c.created_at,
+          updatedAt: c.updated_at,
+        }));
+      
+      setAllCandidates(mapped);
+      if (mapped.length > 0) {
+        setSelectedCandidate(mapped[0]);
+      }
+    } catch (error: any) {
+      console.error('Failed to load candidates:', error);
+      toast.error('Failed to load candidates');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Add timestamp to bust cache
-      const response = await candidatesApi.getAll({ limit: 1000, t: Date.now() } as any);
-      const apiCandidates = response.data.candidates || [];
-      
-      if (apiCandidates.length > 0) {
-        // Map from snake_case to camelCase
-        // Only include candidates with actual AI scores (no sample data fallback)
-        const mapped = apiCandidates
-          .filter((c: any) => c.ai_scores && Object.keys(c.ai_scores).length > 0)
-          .map((c: any) => {
-            return {
-              id: c.id,
-              name: c.name,
-              email: c.email,
-              phone: c.phone,
-              location: c.location,
-              linkedin: c.linkedin,
-              github: c.github,
-              portfolio: c.portfolio,
-              photoUrl: c.photo_url,
-              resumeUrl: c.resume_url,
-              resumeText: c.resume_text,
-              parsedData: c.parsed_data || {},
-              aiScores: c.ai_scores,
-              matchScores: c.match_scores || {},
-              status: c.status || 'applied',
-              jobId: c.job_id,
-              appliedAt: c.applied_at,
-              createdAt: c.created_at,
-              updatedAt: c.updated_at,
-            };
-          });
-        setAllCandidates(mapped);
-        setSelectedCandidate(mapped[0]);
-      }
+      await loadCandidates();
       toast.success('Analysis data refreshed');
     } catch (error: any) {
       console.error('Analysis refresh error:', error);
-      console.error('Error response:', error.response?.data);
-      toast.error(`Failed to refresh analysis data: ${error.response?.status || error.message}`);
+      toast.error(`Failed to refresh analysis data`);
     } finally {
       setIsRefreshing(false);
     }
   };
 
   const radarData = [
-    { subject: 'Technical', value: selectedCandidate.aiScores?.technical || 0 },
-    { subject: 'Experience', value: selectedCandidate.aiScores?.experience || 0 },
-    { subject: 'Leadership', value: selectedCandidate.aiScores?.leadership || 0 },
-    { subject: 'Communication', value: selectedCandidate.aiScores?.communication || 0 },
-    { subject: 'Problem Solving', value: selectedCandidate.aiScores?.problemSolving || 0 },
-    { subject: 'Teamwork', value: selectedCandidate.aiScores?.teamwork || 0 },
-    { subject: 'Learning', value: selectedCandidate.aiScores?.learningPotential || 0 },
+    { subject: 'Technical', value: selectedCandidate?.aiScores?.technical || 0 },
+    { subject: 'Experience', value: selectedCandidate?.aiScores?.experience || 0 },
+    { subject: 'Leadership', value: selectedCandidate?.aiScores?.leadership || 0 },
+    { subject: 'Communication', value: selectedCandidate?.aiScores?.communication || 0 },
+    { subject: 'Problem Solving', value: selectedCandidate?.aiScores?.problemSolving || 0 },
+    { subject: 'Teamwork', value: selectedCandidate?.aiScores?.teamwork || 0 },
+    { subject: 'Learning', value: selectedCandidate?.aiScores?.learningPotential || 0 },
   ];
+
+  if (isLoading) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <Loader size={32} className="animate-spin text-brand-500" />
+          <p className="text-surface-600 dark:text-surface-400">Loading analysis data...</p>
+        </div>
+      </PageTransition>
+    );
+  }
+
+  if (!selectedCandidate || allCandidates.length === 0) {
+    return (
+      <PageTransition>
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <Card className="text-center py-12 w-full">
+            <p className="text-surface-600 dark:text-surface-400 mb-4">No candidates with AI analysis available yet.</p>
+            <Button variant="primary" size="sm" onClick={handleRefresh} icon={<RotateCw size={16} />}>
+              Refresh
+            </Button>
+          </Card>
+        </div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>
