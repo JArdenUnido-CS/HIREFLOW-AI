@@ -29,53 +29,56 @@ export function AnalysisPage() {
       const response = await candidatesApi.getAll({ limit: 1000 });
       const apiCandidates = response.data.candidates || [];
       
+      console.log('AnalysisPage: API Response:', response.data);
       console.log('AnalysisPage: Raw candidates from API:', apiCandidates);
-      console.log('AnalysisPage: First candidate ai_scores:', apiCandidates[0]?.ai_scores);
+      console.log('AnalysisPage: Total candidates:', apiCandidates.length);
       
-      // Map from snake_case to camelCase - include all candidates
-      const mapped = apiCandidates
-        .map((c: any) => {
-          // Parse ai_scores if it's a string
-          let aiScores = c.ai_scores;
-          if (typeof aiScores === 'string') {
-            try {
-              aiScores = JSON.parse(aiScores);
-            } catch {
-              aiScores = {};
-            }
+      // Map from snake_case to camelCase - include ALL candidates for debugging
+      const mapped = apiCandidates.map((c: any) => {
+        // Parse ai_scores if it's a string
+        let aiScores = c.ai_scores;
+        if (typeof aiScores === 'string') {
+          try {
+            aiScores = JSON.parse(aiScores);
+          } catch {
+            aiScores = {};
           }
-          
-          return {
-            id: c.id,
-            name: c.name,
-            email: c.email,
-            phone: c.phone,
-            location: c.location,
-            linkedin: c.linkedin,
-            github: c.github,
-            portfolio: c.portfolio,
-            photoUrl: c.photo_url,
-            resumeUrl: c.resume_url,
-            resumeText: c.resume_text,
-            parsedData: c.parsed_data || {},
-            aiScores: aiScores || {},
-            matchScores: c.match_scores || {},
-            status: c.status || 'applied',
-            jobId: c.job_id,
-            appliedAt: c.applied_at,
-            createdAt: c.created_at,
-            updatedAt: c.updated_at,
-          };
-        })
-        // Filter for candidates with AI scores
-        .filter((c: any) => c.aiScores && Object.keys(c.aiScores).length > 0);
+        }
+        
+        return {
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone,
+          location: c.location,
+          linkedin: c.linkedin,
+          github: c.github,
+          portfolio: c.portfolio,
+          photoUrl: c.photo_url,
+          resumeUrl: c.resume_url,
+          resumeText: c.resume_text,
+          parsedData: c.parsed_data || {},
+          aiScores: aiScores || {},
+          matchScores: c.match_scores || {},
+          status: c.status || 'applied',
+          jobId: c.job_id,
+          appliedAt: c.applied_at,
+          createdAt: c.created_at,
+          updatedAt: c.updated_at,
+        };
+      });
       
-      console.log('AnalysisPage: Mapped candidates with AI scores:', mapped);
-      console.log('AnalysisPage: Total candidates with AI scores:', mapped.length);
+      console.log('AnalysisPage: Mapped candidates:', mapped);
+      console.log('AnalysisPage: First candidate:', mapped[0]);
+      console.log('AnalysisPage: First candidate AI scores:', mapped[0]?.aiScores);
       
+      // For now, show ALL candidates even without AI scores
       setAllCandidates(mapped);
       if (mapped.length > 0) {
         setSelectedCandidate(mapped[0]);
+        console.log('AnalysisPage: Selected first candidate:', mapped[0].name);
+      } else {
+        console.log('AnalysisPage: No candidates returned from API');
       }
     } catch (error: any) {
       console.error('Failed to load candidates:', error);
