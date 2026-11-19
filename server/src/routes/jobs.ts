@@ -198,12 +198,12 @@ router.patch('/:id', authenticate, requireRole('admin', 'employer'), async (req,
 
         // Re-calculate match scores for each candidate
         const jobRequirements = {
-          skillsRequired: job.skills_required || [],
-          skillsPreferred: job.skills_preferred || [],
+          skillsRequired: Array.isArray(job.skills_required) ? job.skills_required : [],
+          skillsPreferred: Array.isArray(job.skills_preferred) ? job.skills_preferred : [],
           experienceYears: job.experience_years || 0,
           education: job.education || null,
           location: job.location || '',
-          type: job.type || 'mid',
+          type: job.type || 'full-time',
         };
 
         for (const candidate of applicants) {

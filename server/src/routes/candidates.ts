@@ -420,14 +420,14 @@ router.post('/:id/match-job/:jobId', authenticate, async (req, res) => {
       });
     }
 
-    // Build job requirements from job data
+    // Build job requirements from job data (ensure parsed arrays)
     const jobRequirements = {
-      skillsRequired: job.skills_required || [],
-      skillsPreferred: job.skills_preferred || [],
+      skillsRequired: Array.isArray(job.skills_required) ? job.skills_required : [],
+      skillsPreferred: Array.isArray(job.skills_preferred) ? job.skills_preferred : [],
       experienceYears: job.experience_years || 0,
       education: job.education || null,
       location: job.location || '',
-      type: job.type || 'mid',
+      type: job.type || 'full-time',
     };
 
     // Calculate match scores

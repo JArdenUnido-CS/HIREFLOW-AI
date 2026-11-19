@@ -260,9 +260,19 @@ export function calculateLocationMatch(
 
 /**
  * Flatten skill categories into single array
+ * Handles both flat arrays and categorized objects
  */
-export function flattenSkills(skills: Array<{ category: string; skills: string[] }>): string[] {
-  return skills.flatMap((s) => s.skills);
+export function flattenSkills(skills: any[]): string[] {
+  if (!Array.isArray(skills)) return [];
+  
+  return skills.flatMap((s) => {
+    // If it's a string, return as-is
+    if (typeof s === 'string') return s;
+    // If it's an object with skills array, flatten those
+    if (s.skills && Array.isArray(s.skills)) return s.skills;
+    // Otherwise return empty
+    return [];
+  });
 }
 
 /**
