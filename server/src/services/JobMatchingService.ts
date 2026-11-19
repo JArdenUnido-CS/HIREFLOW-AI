@@ -294,7 +294,7 @@ export class JobMatchingService {
   private static calculateDomainFitScore(
     experience: Array<{ title: string }>
   ): number {
-    if (experience.length === 0) return 40;
+    if (experience.length === 0 || !experience[0]?.title) return 40;
 
     // Infer primary domain from current role
     const currentRole = experience[0].title.toLowerCase();
@@ -319,7 +319,9 @@ export class JobMatchingService {
     }
 
     // Check if all experience is in same domain
-    const allRoles = experience.map((e) => e.title.toLowerCase());
+    const allRoles = experience.map((e) => e.title?.toLowerCase() || "").filter(Boolean);
+    if (allRoles.length === 0) return 40;
+    
     const allSameDomain = allRoles.every(
       (role) =>
         candidateDomain === "Full-stack" ||
