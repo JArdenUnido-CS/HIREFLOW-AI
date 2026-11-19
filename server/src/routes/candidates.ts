@@ -73,6 +73,7 @@ router.get('/', authenticate, async (req, res) => {
     if (req.user?.role === 'employer') {
       // Employers see all candidates for now (demo/testing)
       candidates = await CandidateRepository.findAll(limit, offset, status);
+      console.log(`✓ GET /api/candidates - Employer ${req.user.email} fetched ${candidates.length} candidates`);
     } else if (req.user?.role === 'client') {
       // Clients see only their own profile
       if (emailFilter && emailFilter === req.user.email) {
@@ -93,7 +94,9 @@ router.get('/', authenticate, async (req, res) => {
       return res.status(403).json({ error: 'You do not have permission to view candidates' });
     }
 
-    res.json({ candidates: candidates.map(transformCandidate), limit, offset });
+    const transformed = candidates.map(transformCandidate);
+    console.log(`  Response includes ${transformed.length} candidates, first candidate ai_scores:`, transformed[0]?.aiScores ? 'present' : 'missing');
+    res.json({ candidates: transformed, limit, offset });
   } catch (error) {
     console.error('Get candidates error:', error);
     res.status(500).json({ error: 'Failed to fetch candidates' });
