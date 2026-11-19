@@ -272,7 +272,7 @@ export class JobMatchingService {
     experience: Array<{ title: string }>,
     requiredYears: number
   ): number {
-    if (experience.length === 0) return 30;
+    if (experience.length === 0 || !experience[0].title) return 30;
 
     // Infer job seniority requirement
     let jobSeniority = 2; // Default to mid-level

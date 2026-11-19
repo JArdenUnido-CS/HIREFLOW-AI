@@ -108,7 +108,9 @@ export function calculateYearsBetween(startDate: string, endDate: string | "Pres
 /**
  * Extract seniority level from job title
  */
-export function extractSeniorityLevel(title: string): number {
+export function extractSeniorityLevel(title: string | undefined): number {
+  if (!title || typeof title !== 'string') return 1;
+  
   const lowerTitle = title.toLowerCase();
   
   const leadKeywords = ["tech lead", "engineering manager", "staff engineer", "principal", "director", "head", "vp", "cto"];
