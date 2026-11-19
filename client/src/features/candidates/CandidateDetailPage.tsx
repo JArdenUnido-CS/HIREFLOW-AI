@@ -340,20 +340,37 @@ export function CandidateDetailPage() {
           <Card padding="lg">
             <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Skills</h3>
             <div className="space-y-4">
-              {parsedData.skills.map((skillCat: any, idx: number) => (
-                <div key={idx}>
-                  <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2 capitalize">
-                    {skillCat.category}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {skillCat.skills.map((skill: string, sidx: number) => (
-                      <Badge key={sidx} variant="default">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              {parsedData.skills.map((skillItem: any, idx: number) => {
+                // Handle both flat array of strings and categorized objects
+                if (typeof skillItem === 'string') {
+                  // Flat array format - just display as badges
+                  return (
+                    <div key={idx} className="flex flex-wrap gap-2">
+                      <Badge variant="default">{skillItem}</Badge>
+                    </div>
+                  );
+                }
+                
+                // Categorized format
+                if (skillItem.category && Array.isArray(skillItem.skills)) {
+                  return (
+                    <div key={idx}>
+                      <p className="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2 capitalize">
+                        {skillItem.category}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {skillItem.skills.map((skill: string, sidx: number) => (
+                          <Badge key={sidx} variant="default">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return null;
+              })}
             </div>
           </Card>
         )}
