@@ -14,6 +14,11 @@ import { CVPreview } from './CVPreview';
 
 export interface ParsedCV {
   summary: string;
+  phone?: string;
+  location?: string;
+  linkedin?: string;
+  github?: string;
+  portfolio?: string;
   experience: any[];
   education: any[];
   skills: any[];
@@ -32,6 +37,11 @@ export function CVBuilder({ candidateId: initialCandidateId, onSave }: CVBuilder
   const { user } = useAuthStore();
   const [cv, setCV] = useState<ParsedCV>({
     summary: '',
+    phone: '',
+    location: '',
+    linkedin: '',
+    github: '',
+    portfolio: '',
     experience: [],
     education: [],
     skills: [],
@@ -90,6 +100,11 @@ export function CVBuilder({ candidateId: initialCandidateId, onSave }: CVBuilder
         
         setCV({
           summary: parsedData.summary || '',
+          phone: parsedData.phone || '',
+          location: parsedData.location || '',
+          linkedin: parsedData.linkedin || '',
+          github: parsedData.github || '',
+          portfolio: parsedData.portfolio || '',
           experience: parsedData.experience || [],
           education: parsedData.education || [],
           skills: parsedData.skills || [],
@@ -130,6 +145,8 @@ export function CVBuilder({ candidateId: initialCandidateId, onSave }: CVBuilder
       if (res.ok) {
         toast.success('CV saved successfully!');
         onSave?.();
+        // Reload CV from server to ensure preview shows saved data
+        await loadCV();
       } else {
         const errorData = await res.json();
         if (errorData.details) {

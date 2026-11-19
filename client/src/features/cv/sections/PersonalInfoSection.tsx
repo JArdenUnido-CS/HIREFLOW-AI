@@ -56,6 +56,8 @@ export function PersonalInfoSection({ cv, setCV }: PersonalInfoSectionProps) {
             <input
               type="tel"
               placeholder="+1 (555) 123-4567"
+              value={cv.phone || ''}
+              onChange={(e) => setCV({ ...cv, phone: e.target.value })}
               className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white placeholder-surface-400"
             />
           </div>
@@ -67,6 +69,8 @@ export function PersonalInfoSection({ cv, setCV }: PersonalInfoSectionProps) {
             <input
               type="text"
               placeholder="City, Country"
+              value={cv.location || ''}
+              onChange={(e) => setCV({ ...cv, location: e.target.value })}
               className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white placeholder-surface-400"
             />
           </div>
@@ -80,6 +84,8 @@ export function PersonalInfoSection({ cv, setCV }: PersonalInfoSectionProps) {
             <input
               type="url"
               placeholder="linkedin.com/in/yourname"
+              value={cv.linkedin || ''}
+              onChange={(e) => setCV({ ...cv, linkedin: e.target.value })}
               className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white placeholder-surface-400"
             />
           </div>
@@ -91,6 +97,8 @@ export function PersonalInfoSection({ cv, setCV }: PersonalInfoSectionProps) {
             <input
               type="url"
               placeholder="github.com/yourname"
+              value={cv.github || ''}
+              onChange={(e) => setCV({ ...cv, github: e.target.value })}
               className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white placeholder-surface-400"
             />
           </div>
@@ -102,6 +110,8 @@ export function PersonalInfoSection({ cv, setCV }: PersonalInfoSectionProps) {
             <input
               type="url"
               placeholder="yourwebsite.com"
+              value={cv.portfolio || ''}
+              onChange={(e) => setCV({ ...cv, portfolio: e.target.value })}
               className="w-full px-4 py-2 border border-surface-300 dark:border-surface-600 rounded-lg bg-white dark:bg-surface-700 text-surface-900 dark:text-white placeholder-surface-400"
             />
           </div>

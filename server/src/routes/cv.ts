@@ -84,6 +84,11 @@ const projectSchema = z.object({
 
 const cvDataSchema = z.object({
   summary: z.string().min(0, 'Professional summary').optional().default(''),
+  phone: z.string().optional(),
+  location: z.string().optional(),
+  linkedin: z.string().optional(),
+  github: z.string().optional(),
+  portfolio: z.string().optional(),
   experience: z.array(experienceSchema).default([]),
   education: z.array(educationSchema).default([]),
   skills: z.array(skillSchema).default([]),

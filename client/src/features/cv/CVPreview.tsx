@@ -15,6 +15,23 @@ export function CVPreview({ cv }: CVPreviewProps) {
         <h1 className="text-4xl font-bold text-surface-900 dark:text-white mb-2">{user?.name || 'Your Name'}</h1>
         <div className="flex flex-wrap gap-4 text-sm text-surface-600 dark:text-surface-400">
           {user?.email && <span>{user.email}</span>}
+          {cv.phone && <span>{cv.phone}</span>}
+          {cv.location && <span>{cv.location}</span>}
+          {cv.linkedin && (
+            <a href={`https://${cv.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+              LinkedIn
+            </a>
+          )}
+          {cv.github && (
+            <a href={`https://${cv.github}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+              GitHub
+            </a>
+          )}
+          {cv.portfolio && (
+            <a href={`https://${cv.portfolio}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+              Portfolio
+            </a>
+          )}
           {cv.experience.length > 0 && (
             <span className="font-medium">
               {Math.round(
