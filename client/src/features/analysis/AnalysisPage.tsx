@@ -30,22 +30,10 @@ export function AnalysisPage() {
       const apiCandidates = response.data.candidates || [];
       
       console.log('AnalysisPage: Raw candidates from API:', apiCandidates);
+      console.log('AnalysisPage: First candidate ai_scores:', apiCandidates[0]?.ai_scores);
       
-      // Map from snake_case to camelCase and filter for candidates with AI scores
+      // Map from snake_case to camelCase - include all candidates
       const mapped = apiCandidates
-        .filter((c: any) => {
-          // Check if ai_scores exists and has content
-          if (!c.ai_scores) return false;
-          if (typeof c.ai_scores === 'string') {
-            try {
-              const parsed = JSON.parse(c.ai_scores);
-              return parsed && Object.keys(parsed).length > 0;
-            } catch {
-              return false;
-            }
-          }
-          return Object.keys(c.ai_scores).length > 0;
-        })
         .map((c: any) => {
           // Parse ai_scores if it's a string
           let aiScores = c.ai_scores;
@@ -70,7 +58,7 @@ export function AnalysisPage() {
             resumeUrl: c.resume_url,
             resumeText: c.resume_text,
             parsedData: c.parsed_data || {},
-            aiScores: aiScores,
+            aiScores: aiScores || {},
             matchScores: c.match_scores || {},
             status: c.status || 'applied',
             jobId: c.job_id,
@@ -78,7 +66,9 @@ export function AnalysisPage() {
             createdAt: c.created_at,
             updatedAt: c.updated_at,
           };
-        });
+        })
+        // Filter for candidates with AI scores
+        .filter((c: any) => c.aiScores && Object.keys(c.aiScores).length > 0);
       
       console.log('AnalysisPage: Mapped candidates with AI scores:', mapped);
       console.log('AnalysisPage: Total candidates with AI scores:', mapped.length);
