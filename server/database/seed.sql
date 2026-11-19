@@ -135,66 +135,8 @@ INSERT INTO candidates (
   'interview',
   'job_01',
   '2026-07-20 14:30:00',
-  JSON_OBJECT(
-    'name', 'Emily Zhang',
-    'summary', 'Experienced Frontend Engineer with 6 years building scalable web applications. Expert in React, TypeScript, and modern tooling. Passionate about performance optimization and mentoring junior developers.',
-    'phone', '+1 (415) 555-0142',
-    'location', 'San Francisco, CA',
-    'linkedin', 'linkedin.com/in/emilyzhang',
-    'github', 'github.com/emilyzhang',
-    'portfolio', NULL,
-    'experience', JSON_ARRAY(
-      JSON_OBJECT(
-        'title', 'Senior Frontend Engineer',
-        'company', 'TechCorp',
-        'location', 'San Francisco, CA',
-        'startDate', '2023-03',
-        'endDate', NULL,
-        'isCurrent', true,
-        'employmentType', 'full-time',
-        'description', JSON_ARRAY('Led frontend architecture redesign improving performance by 40%', 'Mentored 3 junior engineers', 'Implemented design system serving 50+ components')
-      ),
-      JSON_OBJECT(
-        'title', 'Frontend Engineer',
-        'company', 'StartupXYZ',
-        'location', 'San Francisco, CA',
-        'startDate', '2020-06',
-        'endDate', '2023-02',
-        'isCurrent', false,
-        'employmentType', 'full-time',
-        'description', JSON_ARRAY('Built responsive web applications using React', 'Reduced bundle size by 35%', 'Implemented CI/CD pipeline')
-      )
-    ),
-    'education', JSON_ARRAY(
-      JSON_OBJECT(
-        'degree', 'Bachelor of Science',
-        'field', 'Computer Science',
-        'institution', 'University of California, Berkeley',
-        'year', 2020,
-        'gpa', 3.8
-      )
-    ),
-    'skills', JSON_ARRAY(
-      JSON_OBJECT('category', 'Frontend', 'skills', JSON_ARRAY('React', 'TypeScript', 'CSS-in-JS', 'Webpack')),
-      JSON_OBJECT('category', 'Testing', 'skills', JSON_ARRAY('Jest', 'React Testing Library', 'Cypress')),
-      JSON_OBJECT('category', 'Tools', 'skills', JSON_ARRAY('Git', 'Docker', 'GitHub Actions'))
-    ),
-    'certifications', JSON_ARRAY(),
-    'languages', JSON_ARRAY(
-      JSON_OBJECT('language', 'English', 'proficiency', 'Fluent'),
-      JSON_OBJECT('language', 'Mandarin', 'proficiency', 'Advanced')
-    ),
-    'projects', JSON_ARRAY(
-      JSON_OBJECT(
-        'name', 'Performance Dashboard',
-        'description', 'Real-time monitoring dashboard for performance metrics',
-        'technologies', JSON_ARRAY('React', 'D3.js', 'WebSocket'),
-        'url', 'github.com/emilyzhang/perf-dashboard'
-      )
-    ),
-    'achievements', JSON_ARRAY('Promoted to Senior Engineer in record time', 'Won company hackathon 2024'),
-    'totalYearsExperience', 6
-  )
+  '{"summary":"Senior Frontend Engineer","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":6}',
+  '{"overall":88,"technical":92,"experience":85,"leadership":80,"communication":85,"problemSolving":90,"teamwork":82,"learningPotential":88,"atsCompatibility":91,"strengths":["Strong React expertise","Excellent communication skills","Proven mentorship track record"],"weaknesses":["Limited backend experience","Could improve DevOps knowledge"],"recommendations":["Strong fit for senior frontend roles","Consider adding DevOps skills for growth"],"confidenceLevel":92}'
 ),
 (
   'cand_02',
@@ -207,6 +149,197 @@ INSERT INTO candidates (
   NULL,
   'shortlisted',
   'job_04',
+  '2026-07-18 09:15:00',
+  '{"summary":"Backend Engineer with 5 years experience","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":5}',
+  '{"overall":85,"technical":88,"experience":84,"leadership":78,"communication":80,"problemSolving":87,"teamwork":82,"learningPotential":85,"atsCompatibility":89,"strengths":["Expert in system design","Strong DevOps capabilities","Excellent problem solver"],"weaknesses":["Limited frontend knowledge","Could improve documentation habits"],"recommendations":["Excellent backend engineer","Consider full-stack development path"],"confidenceLevel":90}'
+),
+(
+  'cand_03',
+  'Priya Sharma',
+  'priya.sharma@proton.me',
+  '+1 (646) 555-0173',
+  'New York, NY',
+  'linkedin.com/in/priyasharma',
+  NULL,
+  'priyasharma.design',
+  'screening',
+  'job_03',
+  '2026-07-25 11:00:00',
+  '{"summary":"Product Designer with 4 years experience","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":4}',
+  '{"overall":82,"technical":78,"experience":80,"leadership":85,"communication":88,"problemSolving":80,"teamwork":84,"learningPotential":82,"atsCompatibility":85,"strengths":["Design systems expert","Strong user research skills","Accessibility advocate"],"weaknesses":["Limited coding skills","Could improve technical depth"],"recommendations":["Perfect fit for design-focused roles","Consider learning frontend development"],"confidenceLevel":88}'
+),
+(
+  'cand_04',
+  'David Park',
+  'david.park@gmail.com',
+  '+1 (206) 555-0156',
+  'Seattle, WA',
+  NULL,
+  'github.com/davidpark',
+  NULL,
+  'applied',
+  'job_02',
+  '2026-07-28 16:45:00',
+  '{"summary":"ML Engineer with 4 years experience","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":4}',
+  '{"overall":89,"technical":94,"experience":83,"leadership":75,"communication":82,"problemSolving":95,"teamwork":80,"learningPotential":91,"atsCompatibility":92,"strengths":["Advanced ML expertise","Strong research background","Excellent problem solver"],"weaknesses":["Limited leadership experience","Could improve communication"],"recommendations":["Top candidate for ML roles","Consider leadership track if interested"],"confidenceLevel":94}'
+),
+(
+  'cand_05',
+  'Sofia Rodriguez',
+  'sofia.r@yahoo.com',
+  '+1 (305) 555-0187',
+  'Miami, FL',
+  'linkedin.com/in/sofiarodriguez',
+  NULL,
+  NULL,
+  'technical_test',
+  'job_01',
+  '2026-07-15 08:30:00',
+  '{"summary":"Full-stack Developer with 3 years experience","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":3}',
+  '{"overall":78,"technical":82,"experience":75,"leadership":70,"communication":78,"problemSolving":80,"teamwork":76,"learningPotential":85,"atsCompatibility":80,"strengths":["Fast learner","Good fundamentals","Motivated professional"],"weaknesses":["Limited experience","Could improve advanced skills"],"recommendations":["Good for junior/mid-level roles","Strong potential with mentoring"],"confidenceLevel":80}'
+),
+(
+  'cand_06',
+  'James Wilson',
+  'james.w@gmail.com',
+  '+1 (773) 555-0134',
+  'Chicago, IL',
+  NULL,
+  'github.com/jameswilson',
+  NULL,
+  'offer',
+  'job_04',
+  '2026-07-01 10:00:00',
+  '{"summary":"Senior Backend Engineer with 6 years experience","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":6}',
+  '{"overall":87,"technical":85,"experience":89,"leadership":88,"communication":86,"problemSolving":86,"teamwork":87,"learningPotential":84,"atsCompatibility":88,"strengths":["Senior-level experience","Strong leadership skills","Proven track record"],"weaknesses":["May need modern tech refresher"],"recommendations":["Excellent for senior positions","Ready for team lead role"],"confidenceLevel":91}'
+),
+(
+  'cand_07',
+  'Aisha Patel',
+  'aisha.patel@icloud.com',
+  '+1 (408) 555-0199',
+  'San Jose, CA',
+  'linkedin.com/in/aishapatel',
+  NULL,
+  NULL,
+  'hired',
+  'job_02',
+  '2026-06-15 09:30:00',
+  '{"summary":"ML Research Engineer with PhD","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":5}',
+  '{"overall":91,"technical":96,"experience":85,"leadership":82,"communication":88,"problemSolving":94,"teamwork":85,"learningPotential":89,"atsCompatibility":95,"strengths":["PhD researcher","Published author","Deep ML expertise"],"weaknesses":["Limited industry experience"],"recommendations":["Exceptional ML researcher","Perfect for research teams"],"confidenceLevel":96}'
+),
+(
+  'cand_08',
+  'Chen Wei',
+  'chen.wei@outlook.com',
+  '+1 (212) 555-0167',
+  'New York, NY',
+  NULL,
+  NULL,
+  'chenwei.design',
+  'rejected',
+  'job_03',
+  '2026-07-10 14:00:00',
+  '{"summary":"Visual Designer with 3 years experience","experience":[],"education":[],"skills":[],"certifications":[],"languages":[],"projects":[],"achievements":[],"totalYearsExperience":3}',
+  '{"overall":76,"technical":72,"experience":74,"leadership":70,"communication":76,"problemSolving":74,"teamwork":72,"learningPotential":78,"atsCompatibility":74,"strengths":["Strong design fundamentals","Creative thinker"],"weaknesses":["Limited user research experience","Could improve depth"],"recommendations":["Consider design roles with mentoring"],"confidenceLevel":75}'
+);
+
+-- =============================================================================
+-- Insert Sample Interviews
+-- =============================================================================
+
+INSERT INTO interviews (id, candidate_id, job_id, scheduled_at, type, status, created_at) VALUES
+(
+  'int_01',
+  'cand_01',
+  'job_01',
+  '2026-08-02 10:00:00',
+  'technical',
+  'scheduled',
+  '2026-07-28 10:00:00'
+),
+(
+  'int_02',
+  'cand_02',
+  'job_04',
+  '2026-08-03 14:00:00',
+  'behavioral',
+  'scheduled',
+  '2026-07-28 11:00:00'
+),
+(
+  'int_03',
+  'cand_05',
+  'job_01',
+  '2026-08-01 11:30:00',
+  'coding',
+  'scheduled',
+  '2026-07-28 12:00:00'
+);
+
+-- =============================================================================
+-- Insert Sample Activities
+-- =============================================================================
+
+INSERT INTO activities (id, type, description, user_id, created_at) VALUES
+(
+  'act_01',
+  'candidate_added',
+  'David Park applied for Machine Learning Engineer',
+  'usr_01',
+  '2026-07-28 16:45:00'
+),
+(
+  'act_02',
+  'stage_changed',
+  'Emily Zhang moved to Interview stage',
+  'usr_01',
+  '2026-07-27 14:00:00'
+),
+(
+  'act_03',
+  'interview_scheduled',
+  'Technical interview scheduled with Emily Zhang',
+  'usr_01',
+  '2026-07-26 10:30:00'
+);
+
+-- =============================================================================
+-- Insert Sample Notifications
+-- =============================================================================
+
+INSERT INTO notifications (id, user_id, title, message, type, is_read, created_at) VALUES
+(
+  'notif_01',
+  'usr_01',
+  'New Application',
+  'David Park applied for Machine Learning Engineer',
+  'info',
+  0,
+  '2026-07-28 16:45:00'
+),
+(
+  'notif_02',
+  'usr_01',
+  'Interview Tomorrow',
+  'Technical interview with Emily Zhang at 10:00 AM',
+  'warning',
+  0,
+  '2026-07-28 09:00:00'
+),
+(
+  'notif_03',
+  'usr_01',
+  'Offer Accepted',
+  'James Wilson accepted the Senior Engineer offer',
+  'success',
+  1,
+  '2026-07-27 15:00:00'
+);
+
+-- =============================================================================
+-- End of Seed Data
+-- =============================================================================
   '2026-07-18 09:15:00',
   JSON_OBJECT(
     'name', 'Marcus Johnson',
