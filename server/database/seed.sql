@@ -48,8 +48,8 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'Bachelor\'s in Computer Science or equivalent',
   'open',
   '2026-09-15',
-  'usr_01',
-  'usr_03',
+  'usr_02',
+  'usr_02',
   '2026-06-01 10:00:00'
 ),
 (
@@ -69,8 +69,8 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'Master\'s in ML, AI, or related field',
   'open',
   '2026-08-30',
-  'usr_01',
-  'usr_04',
+  'usr_02',
+  'usr_02',
   '2026-05-20 08:00:00'
 ),
 (
@@ -90,8 +90,8 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'Bachelor\'s in Design, HCI, or equivalent',
   'open',
   '2026-09-01',
-  'usr_01',
-  'usr_05',
+  'usr_02',
+  'usr_02',
   '2026-06-10 09:00:00'
 ),
 (
@@ -111,8 +111,8 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'Bachelor\'s in Computer Science',
   'open',
   '2026-09-20',
-  'usr_01',
-  'usr_03',
+  'usr_02',
+  'usr_02',
   '2026-06-15 11:00:00'
 );
 
