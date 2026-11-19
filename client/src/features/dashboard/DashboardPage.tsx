@@ -11,8 +11,10 @@ import { formatRelativeTime } from '@/lib/utils';
 import { HiringFunnelChart } from './HiringFunnelChart';
 import { RecentActivity } from './RecentActivity';
 import { candidatesApi, jobsApi, interviewsApi, activitiesApi } from '@/services/api';
+import { useAuthStore } from '@/stores/authStore';
 
 export function DashboardPage() {
+  const { user } = useAuthStore();
   const [stats, setStats] = useState({
     totalCandidates: 0,
     candidatesThisWeek: 0,
@@ -136,7 +138,7 @@ export function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-surface-900 dark:text-white">
-              Good morning, Jem
+              Good morning, {user?.name || 'there'}
             </h1>
             <p className="text-surface-500 dark:text-surface-400 mt-1">
               Here's what's happening with your recruitment pipeline today.
