@@ -191,7 +191,7 @@ export class JobMatchingService {
    */
   private static calculateSkillRecencyScore(
     candidateSkills: string[],
-    experience: Array<{ description?: string[]; startDate: string; endDate: string | "Present" }>,
+    experience: Array<{ description?: string[] | string; startDate: string; endDate: string | "Present" }>,
     requiredSkills: string[]
   ): number {
     if (requiredSkills.length === 0) return 100;
@@ -204,12 +204,18 @@ export class JobMatchingService {
 
       // Check most recent job
       if (experience.length > 0) {
-        const mostRecentDesc = experience[0].description?.join(" ").toLowerCase() || "";
+        const desc = experience[0].description;
+        const descText = Array.isArray(desc) ? desc.join(" ") : (desc || "");
+        const mostRecentDesc = descText.toLowerCase();
+        
         if (mostRecentDesc.includes(skill.toLowerCase())) {
           recency = 100;
         } else if (experience.length > 1) {
           // Check 2nd most recent
-          const secondDesc = experience[1].description?.join(" ").toLowerCase() || "";
+          const desc2 = experience[1].description;
+          const descText2 = Array.isArray(desc2) ? desc2.join(" ") : (desc2 || "");
+          const secondDesc = descText2.toLowerCase();
+          
           if (secondDesc.includes(skill.toLowerCase())) {
             recency = 75;
           } else {
@@ -431,9 +437,9 @@ export class JobMatchingService {
    * Institution Prestige Match: Score based on institution
    */
   private static calculateInstitutionPrestigeMatchScore(
-    candidateEducation: Array<{ institution: string }>
+    candidateEducation: Array<{ institution?: string }>
   ): number {
-    if (candidateEducation.length === 0) return 30;
+    if (candidateEducation.length === 0 || !candidateEducation[0]?.institution) return 30;
 
     return calculateInstitutionPrestige(candidateEducation[0].institution);
   }

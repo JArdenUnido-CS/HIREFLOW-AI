@@ -194,7 +194,9 @@ export function parseCandidateDegree(degreeStr: string): number {
 /**
  * Calculate institution prestige score based on name
  */
-export function calculateInstitutionPrestige(institution: string): number {
+export function calculateInstitutionPrestige(institution: string | undefined): number {
+  if (!institution || typeof institution !== 'string') return 30;
+  
   const tier1 = [
     "mit", "stanford", "cmu", "berkeley", "cambridge", "oxford", "caltech",
     "harvard", "yale", "princeton", "imperial college", "eth"
