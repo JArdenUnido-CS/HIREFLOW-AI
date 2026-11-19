@@ -358,15 +358,67 @@ export function CandidateDetailPage() {
           </Card>
         )}
 
-        {/* Certifications */}
+        {/* Projects */}
+        {parsedData?.projects && parsedData.projects.length > 0 && (
+          <Card padding="lg">
+            <h3 className="flex items-center gap-2 text-lg font-semibold text-surface-900 dark:text-white mb-4">
+              <Code size={20} className="text-brand-500" />
+              Projects
+            </h3>
+            <div className="space-y-4">
+              {parsedData.projects.map((project: any, idx: number) => (
+                <div key={idx} className="pb-4 border-b border-surface-200 dark:border-surface-700 last:border-0">
+                  <p className="font-medium text-surface-900 dark:text-white">{project.name}</p>
+                  <p className="text-sm text-surface-600 dark:text-surface-400 mt-1">{project.description}</p>
+                  {project.technologies && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {project.technologies.map((tech: string, tidx: number) => (
+                        <Badge key={tidx} variant="info">{tech}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {project.url && (
+                    <a href={project.url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-500 hover:underline mt-2 inline-block">
+                      View Project →
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Languages */}
+        {parsedData?.languages && parsedData.languages.length > 0 && (
+          <Card padding="lg">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Languages</h3>
+            <div className="space-y-2">
+              {parsedData.languages.map((lang: any, idx: number) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                    {typeof lang === 'string' ? lang : lang.language}
+                  </p>
+                  {typeof lang !== 'string' && lang.proficiency && (
+                    <Badge variant="info">{lang.proficiency}</Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
         {parsedData?.certifications && parsedData.certifications.length > 0 && (
           <Card padding="lg">
             <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-4">Certifications</h3>
             <ul className="space-y-2">
-              {parsedData.certifications.map((cert: string, idx: number) => (
+              {parsedData.certifications.map((cert: any, idx: number) => (
                 <li key={idx} className="flex items-start gap-2 text-sm text-surface-700 dark:text-surface-300">
                   <Award size={16} className="text-brand-500 mt-0.5 flex-shrink-0" />
-                  {cert}
+                  <div>
+                    <p className="font-medium">{typeof cert === 'string' ? cert : cert.name}</p>
+                    {typeof cert !== 'string' && cert.issuer && (
+                      <p className="text-xs text-surface-500">{cert.issuer} • {cert.date}</p>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
