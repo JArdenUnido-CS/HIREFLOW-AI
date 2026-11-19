@@ -35,7 +35,10 @@ export function useAuth(): UseAuthReturn {
 
     try {
       const response = await authApi.login(email, password);
+      console.log('Login response:', response);
+      
       const { token, refreshToken, user: userData } = response.data;
+      console.log('Extracted user data:', userData);
 
       // Store tokens
       localStorage.setItem('auth_token', token);
@@ -43,8 +46,10 @@ export function useAuth(): UseAuthReturn {
 
       // Update store
       setUser(userData);
+      console.log('User set in store:', userData);
     } catch (err) {
       const message = getErrorMessage(err);
+      console.error('Login error:', err);
       setError(message);
       throw err;
     } finally {

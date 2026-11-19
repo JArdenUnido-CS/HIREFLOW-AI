@@ -60,6 +60,26 @@ export class JobRepository {
   }
 
   /**
+   * Get all jobs for a specific employer with pagination
+   * Filters by job ownership (created_by or hiring_manager_id) to ensure employer data isolation
+   */
+  static async findByEmployer(employerId: string, limit: number = 100, offset: number = 0, status?: string): Promise<IJob[]> {
+    let sql = 'SELECT * FROM jobs WHERE created_by = ? OR hiring_manager_id = ?';
+    const params: any[] = [employerId, employerId];
+
+    if (status) {
+      sql += ' AND status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const jobs = await query<any[]>(sql, params);
+    return jobs.map(job => this.formatJobData(job));
+  }
+
+  /**
    * Get jobs by hiring manager
    */
   static async findByHiringManager(hiringManagerId: string): Promise<IJob[]> {
@@ -73,10 +93,10 @@ export class JobRepository {
   /**
    * Get jobs by status
    */
-  static async findByStatus(status: string): Promise<IJob[]> {
+  static async findByStatus(status: string, limit: number = 100, offset: number = 0): Promise<IJob[]> {
     const jobs = await query<any[]>(
-      'SELECT * FROM jobs WHERE status = ? ORDER BY created_at DESC',
-      [status]
+      'SELECT * FROM jobs WHERE status = ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
+      [status, limit, offset]
     );
     return jobs.map(job => this.formatJobData(job));
   }

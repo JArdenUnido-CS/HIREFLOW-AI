@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Plus, Mail, Phone, MapPin, ChevronDown, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -35,6 +36,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function CandidatesPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,7 +150,10 @@ export function CandidatesPage() {
           <StaggerContainer className="space-y-3">
             {filteredCandidates.map((candidate) => (
               <StaggerItem key={candidate.id}>
-                <Card className="p-4 overflow-visible">
+                <Card
+                  className="p-4 overflow-visible cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate(`/employer/candidates/${candidate.id}`)}
+                >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-surface-900 dark:text-white truncate">{candidate.name}</h3>
@@ -165,7 +170,7 @@ export function CandidatesPage() {
                       </div>
                     </div>
                     {/* Status Dropdown & Delete */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <div className="relative">
                         <button
                           onClick={() => setOpenDropdown(openDropdown === candidate.id ? null : candidate.id)}

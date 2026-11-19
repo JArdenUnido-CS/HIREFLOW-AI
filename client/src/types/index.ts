@@ -7,7 +7,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  role: 'admin' | 'recruiter' | 'hiring_manager' | 'viewer' | 'candidate';
+  role: 'admin' | 'employer' | 'client';
   department?: string;
   createdAt: string;
 }

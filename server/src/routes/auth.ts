@@ -22,11 +22,16 @@ const registerSchema = z.object({
  */
 router.post('/login', async (req, res) => {
   try {
+    console.log('Login request received:', { email: req.body.email, hasPassword: !!req.body.password });
     const { email, password } = loginSchema.parse(req.body);
+    console.log('Login schema validated:', { email });
     const authResponse = await AuthService.login(email, password);
+    console.log('Login successful, sending response');
     res.json(authResponse);
   } catch (error) {
+    console.error('Login error:', error);
     if (error instanceof z.ZodError) {
+      console.error('Validation error details:', error.errors);
       return res.status(400).json({ 
         error: 'Validation failed',
         details: error.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
@@ -119,6 +124,50 @@ router.get('/me', authenticate, async (req, res) => {
 router.post('/logout', authenticate, (req, res) => {
   // With JWT, logout is handled client-side by deleting the token
   res.json({ message: 'Logged out successfully' });
+});
+
+/**
+ * PATCH /api/auth/profile
+ * Update user profile information
+ */
+router.patch('/profile', authenticate, async (req, res) => {
+  try {
+    if (!req.user || !req.userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const { name, department } = req.body;
+    
+    // Validate inputs
+    if (name && typeof name !== 'string') {
+      return res.status(400).json({ error: 'Name must be a string' });
+    }
+    if (department && typeof department !== 'string') {
+      return res.status(400).json({ error: 'Department must be a string' });
+    }
+
+    // Import repository
+    const { UserRepository } = await import('../repositories/index.js');
+
+    // Update user
+    const updateData: any = {};
+    if (name) updateData.name = name;
+    if (department !== undefined) updateData.department = department;
+
+    const updatedUser = await UserRepository.update(req.userId, updateData);
+
+    res.json({
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      role: updatedUser.role,
+      department: updatedUser.department,
+    });
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    const message = error instanceof Error ? error.message : 'Failed to update profile';
+    res.status(500).json({ error: message });
+  }
 });
 
 export { router as authRouter };

@@ -17,11 +17,14 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log('Login attempt:', { email });
       await login(email, password);
-      // Navigate based on role - will be done by App.tsx
+      // Navigate to home - App.tsx will redirect based on role
+      console.log('Login successful, navigating to home');
       toast.success('Login successful!');
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
+      console.error('Login failed:', err, 'Error from hook:', authError);
       toast.error(authError || 'Login failed');
     }
   };

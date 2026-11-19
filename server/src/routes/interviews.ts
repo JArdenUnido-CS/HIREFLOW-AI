@@ -19,14 +19,57 @@ const interviewCreateSchema = z.object({
 
 /**
  * GET /api/interviews
- * Get all interviews with pagination
+ * Get all interviews with pagination and filtering
+ * Employers see only interviews for their candidates; clients see only their own interviews; admins see all
+ * Query params: limit, offset, candidateId (for filtering by candidate)
  */
 router.get('/', authenticate, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
+    const candidateIdFilter = req.query.candidateId as string | undefined;
 
-    const interviews = await InterviewRepository.findAll(limit, offset);
+    let interviews = await InterviewRepository.findAll(limit, offset);
+    
+    // Apply role-based filtering
+    if (req.user?.role === 'employer') {
+      // Employers only see interviews for their own candidates
+      const candidateIds = interviews.map(i => i.candidate_id);
+      if (candidateIds.length > 0) {
+        const candidates = await Promise.all(
+          candidateIds.map(id => CandidateRepository.findById(id))
+        );
+        interviews = interviews.filter((interview, idx) => {
+          return candidates[idx]?.employer_id === req.userId;
+        });
+      }
+    } else if (req.user?.role === 'client') {
+      // Clients see only interviews for their own candidate profile
+      // Find the candidate record for this client (matched by email)
+      const candidate = await CandidateRepository.findByEmail(req.user.email!);
+      if (candidate) {
+        interviews = interviews.filter(i => i.candidate_id === candidate.id);
+      } else {
+        // Client has no candidate record yet
+        interviews = [];
+      }
+    }
+    // Admins see all interviews (no filtering)
+
+    // Apply additional candidateId filter if provided and authorized
+    if (candidateIdFilter) {
+      // Only allow filtering if user is admin, or if they're viewing their own candidate's interviews
+      if (req.user?.role !== 'admin') {
+        const candidate = await CandidateRepository.findById(candidateIdFilter);
+        if (req.user?.role === 'employer' && candidate?.employer_id !== req.userId) {
+          return res.status(403).json({ error: 'You do not have permission to view this candidate\'s interviews' });
+        } else if (req.user?.role === 'client' && candidate?.email !== req.user.email) {
+          return res.status(403).json({ error: 'You do not have permission to view this candidate\'s interviews' });
+        }
+      }
+      interviews = interviews.filter(i => i.candidate_id === candidateIdFilter);
+    }
+
     res.json({ interviews, limit, offset });
   } catch (error) {
     console.error('Get interviews error:', error);
@@ -37,10 +80,25 @@ router.get('/', authenticate, async (req, res) => {
 /**
  * GET /api/interviews/upcoming
  * Get upcoming interviews
+ * Employers see only interviews for their candidates; admins see all
  */
 router.get('/upcoming', authenticate, async (req, res) => {
   try {
-    const interviews = await InterviewRepository.findUpcoming();
+    let interviews = await InterviewRepository.findUpcoming();
+    
+    // Employers only see interviews for their own candidates
+    if (req.user?.role === 'employer') {
+      const candidateIds = interviews.map(i => i.candidate_id);
+      if (candidateIds.length > 0) {
+        const candidates = await Promise.all(
+          candidateIds.map(id => CandidateRepository.findById(id))
+        );
+        interviews = interviews.filter((interview, idx) => {
+          return candidates[idx]?.employer_id === req.userId;
+        });
+      }
+    }
+
     res.json({ interviews });
   } catch (error) {
     console.error('Get upcoming interviews error:', error);
@@ -51,6 +109,7 @@ router.get('/upcoming', authenticate, async (req, res) => {
 /**
  * GET /api/interviews/:id
  * Get a specific interview
+ * Employers can only view interviews for their own candidates; clients can only view their own interviews
  */
 router.get('/:id', authenticate, async (req, res) => {
   try {
@@ -58,6 +117,21 @@ router.get('/:id', authenticate, async (req, res) => {
     if (!interview) {
       return res.status(404).json({ error: 'Interview not found' });
     }
+
+    // Authorization: check ownership based on role
+    if (req.user?.role === 'employer') {
+      const candidate = await CandidateRepository.findById(interview.candidate_id);
+      if (!candidate || candidate.employer_id !== req.userId) {
+        return res.status(403).json({ error: 'You do not have permission to view this interview' });
+      }
+    } else if (req.user?.role === 'client') {
+      const candidate = await CandidateRepository.findById(interview.candidate_id);
+      if (!candidate || candidate.email !== req.user.email) {
+        return res.status(403).json({ error: 'You do not have permission to view this interview' });
+      }
+    }
+    // Admins can view any interview (no additional check needed)
+
     res.json({ interview });
   } catch (error) {
     console.error('Get interview error:', error);
@@ -68,6 +142,7 @@ router.get('/:id', authenticate, async (req, res) => {
 /**
  * POST /api/interviews
  * Create a new interview
+ * Employers can only create interviews for their own candidates
  */
 router.post('/', authenticate, async (req, res) => {
   try {
@@ -77,6 +152,11 @@ router.post('/', authenticate, async (req, res) => {
     const candidate = await CandidateRepository.findById(data.candidateId);
     if (!candidate) {
       return res.status(404).json({ error: 'Candidate not found' });
+    }
+
+    // Authorization: employer can only schedule interviews for their own candidates
+    if (req.user?.role === 'employer' && candidate.employer_id !== req.userId) {
+      return res.status(403).json({ error: 'You do not have permission to schedule interviews for this candidate' });
     }
 
     const interviewId = generateId();
@@ -117,12 +197,21 @@ router.post('/', authenticate, async (req, res) => {
 /**
  * PATCH /api/interviews/:id
  * Update an interview
+ * Employers can only update interviews for their own candidates
  */
 router.patch('/:id', authenticate, async (req, res) => {
   try {
     const existing = await InterviewRepository.findById(req.params.id);
     if (!existing) {
       return res.status(404).json({ error: 'Interview not found' });
+    }
+
+    // Authorization: check candidate ownership
+    if (req.user?.role === 'employer') {
+      const candidate = await CandidateRepository.findById(existing.candidate_id);
+      if (!candidate || candidate.employer_id !== req.userId) {
+        return res.status(403).json({ error: 'You do not have permission to update this interview' });
+      }
     }
 
     const data = interviewCreateSchema.partial().parse(req.body);
@@ -153,9 +242,23 @@ router.patch('/:id', authenticate, async (req, res) => {
 /**
  * DELETE /api/interviews/:id
  * Delete an interview
+ * Employers can only delete interviews for their own candidates
  */
 router.delete('/:id', authenticate, async (req, res) => {
   try {
+    const existing = await InterviewRepository.findById(req.params.id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Interview not found' });
+    }
+
+    // Authorization: check candidate ownership
+    if (req.user?.role === 'employer') {
+      const candidate = await CandidateRepository.findById(existing.candidate_id);
+      if (!candidate || candidate.employer_id !== req.userId) {
+        return res.status(403).json({ error: 'You do not have permission to delete this interview' });
+      }
+    }
+
     const success = await InterviewRepository.delete(req.params.id);
     if (!success) {
       return res.status(404).json({ error: 'Interview not found' });

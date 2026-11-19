@@ -15,8 +15,8 @@ import { candidatesApi } from '@/services/api';
 import toast from 'react-hot-toast';
 
 export function AnalysisPage() {
-  const [selectedCandidate, setSelectedCandidate] = useState(sampleCandidates[0]);
-  const [allCandidates, setAllCandidates] = useState(sampleCandidates);
+  const [selectedCandidate, setSelectedCandidate] = useState<any>(sampleCandidates.find(c => c.aiScores && Object.keys(c.aiScores).length > 0) || sampleCandidates[0]);
+  const [allCandidates, setAllCandidates] = useState(sampleCandidates.filter(c => c.aiScores && Object.keys(c.aiScores).length > 0));
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -27,33 +27,33 @@ export function AnalysisPage() {
       const apiCandidates = response.data.candidates || [];
       
       if (apiCandidates.length > 0) {
-        // Map from snake_case to camelCase and preserve AI scores from sample data
-        const mapped = apiCandidates.map((c: any) => {
-          // Find corresponding sample candidate to preserve AI scores
-          const sampleCandidate = sampleCandidates.find(sc => sc.email === c.email);
-          
-          return {
-            id: c.id,
-            name: c.name,
-            email: c.email,
-            phone: c.phone,
-            location: c.location,
-            linkedin: c.linkedin,
-            github: c.github,
-            portfolio: c.portfolio,
-            photoUrl: c.photo_url,
-            resumeUrl: c.resume_url,
-            resumeText: c.resume_text,
-            parsedData: c.parsed_data || sampleCandidate?.parsedData || {},
-            aiScores: c.ai_scores && Object.keys(c.ai_scores).length > 0 ? c.ai_scores : (sampleCandidate?.aiScores || {}),
-            matchScores: c.match_scores || (sampleCandidate?.matchScores || {}),
-            status: c.status || 'applied',
-            jobId: c.job_id,
-            appliedAt: c.applied_at,
-            createdAt: c.created_at,
-            updatedAt: c.updated_at,
-          };
-        });
+        // Map from snake_case to camelCase
+        // Only include candidates with actual AI scores (no sample data fallback)
+        const mapped = apiCandidates
+          .filter((c: any) => c.ai_scores && Object.keys(c.ai_scores).length > 0)
+          .map((c: any) => {
+            return {
+              id: c.id,
+              name: c.name,
+              email: c.email,
+              phone: c.phone,
+              location: c.location,
+              linkedin: c.linkedin,
+              github: c.github,
+              portfolio: c.portfolio,
+              photoUrl: c.photo_url,
+              resumeUrl: c.resume_url,
+              resumeText: c.resume_text,
+              parsedData: c.parsed_data || {},
+              aiScores: c.ai_scores,
+              matchScores: c.match_scores || {},
+              status: c.status || 'applied',
+              jobId: c.job_id,
+              appliedAt: c.applied_at,
+              createdAt: c.created_at,
+              updatedAt: c.updated_at,
+            };
+          });
         setAllCandidates(mapped);
         setSelectedCandidate(mapped[0]);
       }
@@ -197,7 +197,7 @@ export function AnalysisPage() {
                 Strengths
               </h3>
               <ul className="space-y-2">
-                {(selectedCandidate.aiScores?.strengths || []).map((s, i) => (
+                {(selectedCandidate.aiScores?.strengths || []).map((s: string, i: number) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-surface-700 dark:text-surface-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
                     {s}
@@ -212,7 +212,7 @@ export function AnalysisPage() {
                 Areas for Improvement
               </h3>
               <ul className="space-y-2">
-                {(selectedCandidate.aiScores?.weaknesses || []).map((w, i) => (
+                {(selectedCandidate.aiScores?.weaknesses || []).map((w: string, i: number) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-surface-700 dark:text-surface-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                     {w}

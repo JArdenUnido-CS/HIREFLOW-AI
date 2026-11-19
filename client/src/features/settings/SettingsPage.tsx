@@ -9,6 +9,7 @@ import { PageTransition } from '@/components/shared/PageTransition';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -20,7 +21,53 @@ const tabs = [
 export function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const { theme, setTheme } = useThemeStore();
-  const { user } = useAuthStore();
+  const { user, updateProfile } = useAuthStore();
+  const [loading, setLoading] = useState(false);
+  
+  // Profile form state
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    department: user?.department || '',
+  });
+
+  const handleSaveProfile = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token || !user) {
+        toast.error('Not authenticated');
+        return;
+      }
+
+      const res = await fetch('http://localhost:3001/api/auth/profile', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          department: formData.department,
+        }),
+      });
+
+      if (res.ok) {
+        const updatedUser = await res.json();
+        updateProfile(updatedUser);
+        toast.success('Profile updated successfully');
+      } else {
+        const error = await res.json();
+        toast.error(error.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <PageTransition>
@@ -59,10 +106,32 @@ export function SettingsPage() {
                 <Card padding="lg">
                   <h3 className="text-lg font-semibold text-surface-900 dark:text-white mb-6">Profile Information</h3>
                   <div className="space-y-4">
-                    <Input label="Full Name" defaultValue={user?.name} id="name" />
-                    <Input label="Email" type="email" defaultValue={user?.email} id="email" />
-                    <Input label="Department" defaultValue={user?.department} id="department" />
-                    <Button variant="primary">Save Changes</Button>
+                    <Input 
+                      label="Full Name" 
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      id="name" 
+                    />
+                    <Input 
+                      label="Email" 
+                      type="email" 
+                      value={formData.email}
+                      disabled
+                      id="email" 
+                    />
+                    <Input 
+                      label="Department" 
+                      value={formData.department}
+                      onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                      id="department" 
+                    />
+                    <Button 
+                      variant="primary"
+                      onClick={handleSaveProfile}
+                      loading={loading}
+                    >
+                      Save Changes
+                    </Button>
                   </div>
                 </Card>
               </motion.div>

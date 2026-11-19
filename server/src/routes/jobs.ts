@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { JobRepository } from '../repositories/index.js';
+import { JobRepository, CandidateRepository } from '../repositories/index.js';
 import { ActivityRepository } from '../repositories/index.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import { generateId } from '../utils/helpers.js';
+import { JobMatchingService } from '../services/JobMatchingService.js';
 
 const router = Router();
 
@@ -29,14 +30,26 @@ const jobCreateSchema = z.object({
 /**
  * GET /api/jobs
  * Get all jobs with pagination and filtering
+ * Employers see only their own jobs; admins see all jobs; clients see only open jobs
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
     const status = req.query.status as string | undefined;
 
-    const jobs = await JobRepository.findAll(limit, offset, status);
+    let jobs;
+    // Employers see only their own jobs; admins see all jobs; clients see only open jobs
+    if (req.user?.role === 'employer') {
+      jobs = await JobRepository.findByEmployer(req.userId!, limit, offset, status);
+    } else if (req.user?.role === 'client') {
+      // Clients can only see open/published jobs (ignore status param for security)
+      jobs = await JobRepository.findByStatus('open', limit, offset);
+    } else {
+      // Admin can see all jobs
+      jobs = await JobRepository.findAll(limit, offset, status);
+    }
+
     res.json({ jobs, limit, offset });
   } catch (error) {
     console.error('Get jobs error:', error);
@@ -47,13 +60,25 @@ router.get('/', async (req, res) => {
 /**
  * GET /api/jobs/:id
  * Get a specific job by ID
+ * Employers can only view jobs they own; clients can only view open jobs; admins can view any job
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticate, async (req, res) => {
   try {
     const job = await JobRepository.findById(req.params.id);
     if (!job) {
       return res.status(404).json({ error: 'Job not found' });
     }
+
+    // Employer can only view their own jobs
+    if (req.user?.role === 'employer' && job.created_by !== req.userId && job.hiring_manager_id !== req.userId) {
+      return res.status(403).json({ error: 'You do not have permission to view this job' });
+    }
+
+    // Clients can only view open/published jobs
+    if (req.user?.role === 'client' && job.status !== 'open') {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
     res.json({ job });
   } catch (error) {
     console.error('Get job error:', error);
@@ -63,9 +88,10 @@ router.get('/:id', async (req, res) => {
 
 /**
  * POST /api/jobs
- * Create a new job (admin/hiring_manager only)
+ * Create a new job (employer/admin only)
+ * Sets employer_id to the authenticated user
  */
-router.post('/', authenticate, requireRole('admin', 'hiring_manager'), async (req, res) => {
+router.post('/', authenticate, requireRole('admin', 'employer'), async (req, res) => {
   try {
     const data = jobCreateSchema.parse(req.body);
     
@@ -88,7 +114,7 @@ router.post('/', authenticate, requireRole('admin', 'hiring_manager'), async (re
       status: data.status,
       deadline: data.deadline,
       created_by: req.userId!,
-      hiring_manager_id: data.hiringManagerId,
+      hiring_manager_id: data.hiringManagerId || req.userId!,
       applicant_count: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -117,17 +143,19 @@ router.post('/', authenticate, requireRole('admin', 'hiring_manager'), async (re
 
 /**
  * PATCH /api/jobs/:id
- * Update a job (admin/hiring_manager only)
+ * Update a job (employer/admin only)
+ * Employers can only update jobs they own
+ * When job requirements change, automatically re-matches all candidates who applied to this job
  */
-router.patch('/:id', authenticate, requireRole('admin', 'hiring_manager'), async (req, res) => {
+router.patch('/:id', authenticate, requireRole('admin', 'employer'), async (req, res) => {
   try {
     const existingJob = await JobRepository.findById(req.params.id);
     if (!existingJob) {
       return res.status(404).json({ error: 'Job not found' });
     }
 
-    // Validate that user is admin or the hiring manager
-    if (req.user?.role === 'hiring_manager' && existingJob.hiring_manager_id !== req.userId) {
+    // Employer can only update jobs they own
+    if (req.user?.role === 'employer' && existingJob.created_by !== req.userId && existingJob.hiring_manager_id !== req.userId) {
       return res.status(403).json({ error: 'You do not have permission to update this job' });
     }
 
@@ -152,7 +180,70 @@ router.patch('/:id', authenticate, requireRole('admin', 'hiring_manager'), async
       hiring_manager_id: data.hiringManagerId,
     });
 
-    res.json({ job });
+    // Check if job requirements changed (skills, experience, education, location)
+    const requirementsChanged = 
+      (data.skillsRequired && JSON.stringify(data.skillsRequired) !== JSON.stringify(existingJob.skills_required)) ||
+      (data.skillsPreferred && JSON.stringify(data.skillsPreferred) !== JSON.stringify(existingJob.skills_preferred)) ||
+      (data.experienceYears !== undefined && data.experienceYears !== existingJob.experience_years) ||
+      (data.education !== undefined && data.education !== existingJob.education) ||
+      (data.location !== undefined && data.location !== existingJob.location);
+
+    let rematchedCount = 0;
+
+    // If requirements changed, re-match all candidates who applied to this job
+    if (requirementsChanged) {
+      try {
+        // Find all candidates who applied to this job
+        const applicants = await CandidateRepository.findByJobId(req.params.id);
+
+        // Re-calculate match scores for each candidate
+        const jobRequirements = {
+          skillsRequired: job.skills_required || [],
+          skillsPreferred: job.skills_preferred || [],
+          experienceYears: job.experience_years || 0,
+          education: job.education || null,
+          location: job.location || '',
+          type: job.type || 'mid',
+        };
+
+        for (const candidate of applicants) {
+          try {
+            if (!candidate.parsed_data || Object.keys(candidate.parsed_data).length === 0) {
+              continue; // Skip candidates with no parsed data
+            }
+
+            const matchScores = JobMatchingService.calculateMatchScores(
+              candidate.parsed_data as any,
+              jobRequirements
+            );
+
+            // Update candidate match scores
+            await CandidateRepository.update(candidate.id, {
+              match_scores: {
+                ...candidate.match_scores,
+                [req.params.id]: matchScores,
+              },
+            });
+
+            rematchedCount++;
+          } catch (matchError) {
+            console.error(`Failed to re-match candidate ${candidate.id}:`, matchError);
+            // Continue with other candidates if one fails
+          }
+        }
+
+        console.log(`Re-matched ${rematchedCount} candidates for job ${req.params.id}`);
+      } catch (rematchError) {
+        console.error(`Failed to re-match candidates for job ${req.params.id}:`, rematchError);
+        // Don't fail the entire request if re-matching fails
+      }
+    }
+
+    res.json({ 
+      job,
+      rematchedCandidates: rematchedCount,
+      requirementsChanged,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 

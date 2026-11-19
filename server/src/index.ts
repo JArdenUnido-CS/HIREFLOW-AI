@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import pool from './config/database.js';
 import { authRouter } from './routes/auth.js';
+import { adminRouter } from './routes/admin.js';
+import { cvRouter } from './routes/cv.js';
 import { candidatesRouter } from './routes/candidates.js';
 import { jobsRouter } from './routes/jobs.js';
 import { interviewsRouter } from './routes/interviews.js';
@@ -25,6 +27,8 @@ app.use(express.json({ limit: '10mb' }));
 
 // Routes
 app.use('/api/auth', authRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/cv', cvRouter);
 app.use('/api/candidates', candidatesRouter);
 app.use('/api/jobs', jobsRouter);
 app.use('/api/interviews', interviewsRouter);

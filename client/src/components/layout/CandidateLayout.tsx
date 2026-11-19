@@ -1,19 +1,21 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, Briefcase, User, Settings, Sparkles, LogOut, Menu, Moon, Sun, X, FileText } from 'lucide-react';
+import { LayoutDashboard, Briefcase, User, Settings, Sparkles, LogOut, Menu, Moon, Sun, X, FileText, PenTool } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Avatar } from '@/components/ui/Avatar';
 import { GradientOrbs } from '@/components/shared/GradientOrbs';
+import { getRoleDisplayName } from '@/lib/roleDisplay';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/portal' },
-  { icon: Briefcase, label: 'Applications', path: '/portal/applications' },
-  { icon: FileText, label: 'My Resume', path: '/portal/resume' },
-  { icon: User, label: 'My Profile', path: '/portal/profile' },
-  { icon: Settings, label: 'Settings', path: '/portal/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/client/dashboard' },
+  { icon: Briefcase, label: 'Jobs', path: '/client/jobs' },
+  { icon: FileText, label: 'Applications', path: '/client/applications' },
+  { icon: PenTool, label: 'CV Builder', path: '/client/cv' },
+  { icon: User, label: 'My Profile', path: '/client/profile' },
+  { icon: Settings, label: 'Settings', path: '/client/settings' },
 ];
 
 export function CandidateLayout() {
@@ -98,7 +100,7 @@ export function CandidateLayout() {
             <div className="flex items-center gap-3 ml-2 pl-3 border-l border-surface-200 dark:border-surface-700">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-surface-800 dark:text-surface-200">{user.name}</p>
-                <p className="text-xs text-surface-500">Candidate</p>
+                <p className="text-xs text-surface-500">{getRoleDisplayName(user.role as any, user.name)}</p>
               </div>
               <Avatar name={user.name} size="sm" />
               <button

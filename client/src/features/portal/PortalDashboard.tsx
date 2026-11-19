@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { api } from '@/services/api';
+import { api, interviewsApi } from '@/services/api';
+import { Interview } from '@/types';
+import { InterviewCard } from '@/features/client/InterviewCard';
 import toast from 'react-hot-toast';
 
 export function PortalDashboard() {
@@ -12,24 +14,47 @@ export function PortalDashboard() {
     jobsAvailable: 0,
     interviewsScheduled: 0,
   });
+  const [upcomingInterviews, setUpcomingInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [user?.email]);
 
   const fetchStats = async () => {
+    if (!user?.email) return;
+
     try {
+      setLoading(true);
+
       // Get jobs count
-      const jobsRes = await api.get('/api/jobs');
-      // Get candidate applications
-      const candidateRes = await api.get(`/api/candidates?email=${user?.email}`);
+      const jobsRes = await api.get('/jobs');
       
+      // Get candidate applications
+      const candidateRes = await api.get(`/candidates?email=${user.email}`);
+      const applications = candidateRes.data?.candidates || candidateRes.data || [];
+
+      // Get upcoming interviews
+      let interviews: Interview[] = [];
+      try {
+        const interviewsRes = await interviewsApi.getUpcoming();
+        interviews = interviewsRes.data?.interviews || [];
+      } catch (err) {
+        console.log('Could not fetch upcoming interviews:', err);
+      }
+
       setStats({
-        jobsAvailable: jobsRes.data?.length || 0,
-        applicationsSubmitted: candidateRes.data?.length || 0,
-        interviewsScheduled: 0, // Placeholder
+        jobsAvailable: jobsRes.data?.jobs?.length || jobsRes.data?.length || 0,
+        applicationsSubmitted: Array.isArray(applications) ? applications.length : 0,
+        interviewsScheduled: interviews.filter(i => i.status === 'scheduled').length,
       });
+
+      setUpcomingInterviews(
+        interviews
+          .filter(i => i.status === 'scheduled')
+          .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())
+          .slice(0, 3)
+      );
     } catch (error) {
       console.error('Failed to fetch stats:', error);
       toast.error('Failed to load dashboard');
@@ -71,7 +96,7 @@ export function PortalDashboard() {
           Welcome, {user?.name?.split(' ')[0]}! 👋
         </h1>
         <p className="text-lg text-surface-600 dark:text-surface-400">
-          Your profile is live and visible to our admin team
+          Track your applications and upcoming interviews
         </p>
       </motion.div>
 
@@ -107,6 +132,32 @@ export function PortalDashboard() {
         })}
       </div>
 
+      {/* Upcoming interviews section */}
+      {upcomingInterviews.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-surface-900 dark:text-white">Upcoming Interviews</h2>
+            <motion.a
+              href="/client/applications"
+              whileHover={{ scale: 1.05 }}
+              className="text-sm font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+            >
+              View all →
+            </motion.a>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {upcomingInterviews.map((interview, i) => (
+              <InterviewCard key={interview.id} interview={interview} index={i} />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Info section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -117,9 +168,9 @@ export function PortalDashboard() {
         <div className="flex gap-4">
           <AlertCircle size={24} className="text-blue-600 dark:text-blue-400 flex-shrink-0" />
           <div>
-            <h3 className="font-bold text-blue-900 dark:text-blue-300 mb-2">Your Profile is Active</h3>
+            <h3 className="font-bold text-blue-900 dark:text-blue-300 mb-2">Stay Organized</h3>
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              Your account has been created successfully! Admin team members can now see your profile and reach out to you with opportunities that match your qualifications.
+              Your applications are tracked here. Check back often to see updates from employers and prepare for your interviews.
             </p>
           </div>
         </div>

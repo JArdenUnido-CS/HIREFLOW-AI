@@ -68,8 +68,14 @@ apiClient.interceptors.response.use(
 // ============================================================================
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    apiClient.post('/auth/login', { email, password }),
+  login: (email: string, password: string) => {
+    console.log('Calling login API with:', { email });
+    return apiClient.post('/auth/login', { email, password })
+      .then(res => {
+        console.log('Login API response:', res.data);
+        return res;
+      });
+  },
 
   register: (name: string, email: string, password: string) =>
     apiClient.post('/auth/register', { name, email, password }),
@@ -136,6 +142,85 @@ export const candidatesApi = {
 
   delete: (id: string) =>
     apiClient.delete(`/candidates/${id}`),
+
+  /**
+   * Match candidate to a job
+   * Calculates job match scores between candidate and job
+   */
+  matchJob: (candidateId: string, jobId: string) =>
+    apiClient.post(`/candidates/${candidateId}/match-job/${jobId}`),
+};
+
+// ============================================================================
+// Client Jobs API (Public job browsing for job seekers)
+// ============================================================================
+
+export interface ClientJobsQueryParams {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  location?: string;
+  type?: string;
+  skills?: string[];
+  postedAfter?: string;
+}
+
+export const clientJobsApi = {
+  /**
+   * Get available jobs for client job browsing
+   * Filters to only "open" jobs
+   * Client sees all available positions across all employers
+   */
+  browse: (params?: ClientJobsQueryParams) => {
+    const browseParams = {
+      limit: params?.limit || 50,
+      offset: params?.offset || 0,
+      status: 'open',
+      search: params?.search,
+      location: params?.location,
+      type: params?.type,
+      skills: params?.skills?.join(','),
+      postedAfter: params?.postedAfter,
+    };
+    // Remove undefined params
+    Object.keys(browseParams).forEach(key => 
+      (browseParams as any)[key] === undefined && delete (browseParams as any)[key]
+    );
+    return apiClient.get('/jobs', { params: browseParams });
+  },
+
+  /**
+   * Get a specific job for client viewing
+   * Only shows public information
+   */
+  getById: (id: string) =>
+    apiClient.get(`/jobs/${id}`),
+
+  /**
+   * Apply to a job as a client
+   * Creates a candidate record with job_id
+   */
+  apply: (data: {
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+    jobId: string;
+    resumeUrl?: string;
+    linkedIn?: string;
+    portfolio?: string;
+  }) =>
+    apiClient.post('/candidates', {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      location: data.location,
+      jobId: data.jobId,
+      resumeUrl: data.resumeUrl,
+      linkedin: data.linkedIn,
+      portfolio: data.portfolio,
+      status: 'applied',
+    }),
 };
 
 // ============================================================================
@@ -156,6 +241,15 @@ export const interviewsApi = {
 
   getById: (id: string) =>
     apiClient.get(`/interviews/${id}`),
+
+  /**
+   * Get interviews for a specific candidate
+   * For client-side use: fetches interviews where the candidate is the user's own profile
+   */
+  getByCandidateId: (candidateId: string) =>
+    apiClient.get('/interviews', {
+      params: { candidateId },
+    }),
 
   create: (data: any) =>
     apiClient.post('/interviews', data),

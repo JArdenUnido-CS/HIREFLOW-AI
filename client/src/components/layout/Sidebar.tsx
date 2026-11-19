@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Users,
   Briefcase,
-  Upload,
   Kanban,
   BarChart3,
   MessageSquare,
@@ -13,27 +12,55 @@ import {
   ChevronLeft,
   Sparkles,
   CalendarDays,
+  Upload,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
-
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', subtitle: 'Overview & key metrics', path: '/dashboard' },
-  { icon: Users, label: 'Candidates', subtitle: 'Manage applicant profiles', path: '/candidates' },
-  { icon: Briefcase, label: 'Jobs', subtitle: 'Open positions & postings', path: '/jobs' },
-  { icon: Upload, label: 'Upload Resume', subtitle: 'Add new candidate resumes', path: '/upload' },
-  { icon: Kanban, label: 'Pipeline', subtitle: 'Track hiring stages', path: '/pipeline' },
-  { icon: Sparkles, label: 'AI Analysis', subtitle: 'AI-powered candidate insights', path: '/analysis' },
-  { icon: CalendarDays, label: 'Calendar', subtitle: 'Schedule & manage events', path: '/calendar' },
-  { icon: MessageSquare, label: 'Interviews', subtitle: 'Questions & prep tools', path: '/interviews' },
-  { icon: BarChart3, label: 'Analytics', subtitle: 'Reports & hiring data', path: '/analytics' },
-  { icon: Search, label: 'Search', subtitle: 'Find candidates fast', path: '/search' },
-  { icon: Settings, label: 'Settings', subtitle: 'Account & preferences', path: '/settings' },
-];
+import { useAuthStore } from '@/stores/authStore';
 
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebarCollapse, sidebarOpen, toggleSidebar } = useAppStore();
+  const { user } = useAuthStore();
   const location = useLocation();
+
+  // Determine the role prefix for navigation
+  const rolePrefix = user?.role === 'admin' ? '/admin' : user?.role === 'employer' ? '/employer' : user?.role === 'client' ? '/client' : '';
+
+  // Build navigation items with role-specific paths
+  const getNavItems = () => {
+    if (user?.role === 'admin') {
+      return [
+        { icon: LayoutDashboard, label: 'Dashboard', subtitle: 'System overview', path: '/admin/dashboard' },
+        { icon: Users, label: 'Users', subtitle: 'Manage users', path: '/admin/users' },
+        { icon: BarChart3, label: 'Analytics', subtitle: 'Platform analytics', path: '/admin/analytics' },
+        { icon: MessageSquare, label: 'Activity', subtitle: 'Audit log', path: '/admin/activity' },
+        { icon: Settings, label: 'Settings', subtitle: 'System settings', path: '/admin/settings' },
+      ];
+    } else if (user?.role === 'employer') {
+      return [
+        { icon: LayoutDashboard, label: 'Dashboard', subtitle: 'Overview & key metrics', path: '/employer/dashboard' },
+        { icon: Users, label: 'Candidates', subtitle: 'Manage applicant profiles', path: '/employer/candidates' },
+        { icon: Briefcase, label: 'Jobs', subtitle: 'Open positions & postings', path: '/employer/jobs' },
+        { icon: Kanban, label: 'Pipeline', subtitle: 'Track hiring stages', path: '/employer/pipeline' },
+        { icon: Sparkles, label: 'AI Analysis', subtitle: 'AI-powered candidate insights', path: '/employer/analysis' },
+        { icon: CalendarDays, label: 'Calendar', subtitle: 'Schedule & manage events', path: '/employer/calendar' },
+        { icon: MessageSquare, label: 'Interviews', subtitle: 'Questions & prep tools', path: '/employer/interviews' },
+        { icon: BarChart3, label: 'Analytics', subtitle: 'Reports & hiring data', path: '/employer/analytics' },
+        { icon: Search, label: 'Search', subtitle: 'Find candidates fast', path: '/employer/search' },
+        { icon: Settings, label: 'Settings', subtitle: 'Account & preferences', path: '/employer/settings' },
+      ];
+    } else if (user?.role === 'client') {
+      return [
+        { icon: LayoutDashboard, label: 'Dashboard', subtitle: 'Your overview', path: '/client/dashboard' },
+        { icon: Briefcase, label: 'Applications', subtitle: 'My applications', path: '/client/applications' },
+        { icon: Upload, label: 'CV Builder', subtitle: 'Build your CV', path: '/client/cv' },
+        { icon: Settings, label: 'Settings', subtitle: 'Profile settings', path: '/client/settings' },
+      ];
+    }
+    return [];
+  };
+
+  const navItems = getNavItems();
 
   return (
     <>

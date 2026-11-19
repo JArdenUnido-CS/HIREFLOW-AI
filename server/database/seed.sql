@@ -8,12 +8,23 @@ USE hireflow_ai;
 -- Insert Sample Users
 -- =============================================================================
 
--- Admin user (password: password123 - bcrypt hash)
+-- Phase 2 Users: ADMIN, EMPLOYER (Recruiters), and CLIENT (Job Seekers)
+-- Password: password123 (bcrypt hash: $2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe)
+
+-- ADMIN user
 INSERT INTO users (id, email, name, password_hash, role, department, created_at) VALUES
-('usr_01', 'JardenUnido@hireflow.ai', 'Jem Arden Unido', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'admin', 'Talent Acquisition', '2024-01-15 08:00:00'),
-('usr_02', 'alex.rivera@hireflow.ai', 'Alex Rivera', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'hiring_manager', 'Engineering', '2024-02-01 09:30:00'),
-('usr_03', 'maya.patel@hireflow.ai', 'Dr. Maya Patel', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'hiring_manager', 'AI/ML', '2024-02-15 10:00:00'),
-('usr_04', 'jordan.kim@hireflow.ai', 'Jordan Kim', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'hiring_manager', 'Design', '2024-03-01 08:00:00');
+('usr_01', 'JardenUnido@hireflow.ai', 'Jem Arden Unido', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'admin', 'Administration', '2024-01-15 08:00:00');
+
+-- EMPLOYER users (Recruiters)
+INSERT INTO users (id, email, name, password_hash, role, department, created_at) VALUES
+('usr_02', 'recruiter@hireflow.ai', 'Rebecca Recruiter', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'employer', 'Talent Acquisition', '2024-02-01 09:30:00'),
+('usr_03', 'alex.rivera@hireflow.ai', 'Alex Rivera', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'employer', 'Engineering', '2024-02-15 10:00:00'),
+('usr_04', 'maya.patel@hireflow.ai', 'Dr. Maya Patel', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'employer', 'AI/ML', '2024-03-01 08:00:00'),
+('usr_05', 'jordan.kim@hireflow.ai', 'Jordan Kim', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'employer', 'Design', '2024-03-15 08:00:00');
+
+-- CLIENT users (Job Seekers)
+INSERT INTO users (id, email, name, password_hash, role, department, created_at) VALUES
+('usr_06', 'john@example.com', 'John Doe', '$2a$10$KMaxa867u3c/6Vx2LZwlgOirsVisJDdIMaURMgMOsW4DmiSpq3oYe', 'client', NULL, '2024-04-01 10:00:00');
 
 -- =============================================================================
 -- Insert Sample Jobs
@@ -38,7 +49,7 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'open',
   '2026-09-15',
   'usr_01',
-  'usr_02',
+  'usr_03',
   '2026-06-01 10:00:00'
 ),
 (
@@ -59,7 +70,7 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'open',
   '2026-08-30',
   'usr_01',
-  'usr_03',
+  'usr_04',
   '2026-05-20 08:00:00'
 ),
 (
@@ -80,7 +91,7 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'open',
   '2026-09-01',
   'usr_01',
-  'usr_04',
+  'usr_05',
   '2026-06-10 09:00:00'
 ),
 (
@@ -101,7 +112,7 @@ INSERT INTO jobs (id, title, department, location, type, salary_min, salary_max,
   'open',
   '2026-09-20',
   'usr_01',
-  'usr_02',
+  'usr_03',
   '2026-06-15 11:00:00'
 );
 

@@ -7,7 +7,7 @@ export interface IUser extends RowDataPacket {
   name: string;
   password_hash: string;
   avatar?: string;
-  role: 'admin' | 'recruiter' | 'hiring_manager' | 'viewer' | 'candidate';
+  role: 'admin' | 'employer' | 'client';
   department?: string;
   created_at: string;
   updated_at: string;

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(255) NOT NULL COMMENT 'Full name',
   password_hash VARCHAR(255) NOT NULL COMMENT 'bcrypt hashed password',
   avatar VARCHAR(500) COMMENT 'Avatar URL',
-  role ENUM('admin', 'recruiter', 'hiring_manager', 'viewer', 'candidate') NOT NULL DEFAULT 'candidate' COMMENT 'User role',
+  role ENUM('admin', 'employer', 'client') NOT NULL DEFAULT 'client' COMMENT 'User role: admin (system management), employer (recruitment), client (job seeker)',
   department VARCHAR(100) COMMENT 'Department name',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Account creation timestamp',
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp',

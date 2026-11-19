@@ -58,6 +58,40 @@ export class CandidateRepository {
   }
 
   /**
+   * Get all candidates for a specific employer with pagination
+   * Filters by employer_id to ensure employer data isolation
+   * Uses job_id to look up employer (since candidates don't have direct employer_id)
+   */
+  static async findByEmployer(employerId: string, limit: number = 100, offset: number = 0, status?: string): Promise<ICandidate[]> {
+    // Get all jobs for this employer first
+    const jobsForEmployer = await query<any[]>(
+      'SELECT id FROM jobs WHERE created_by = ? OR hiring_manager_id = ?',
+      [employerId, employerId]
+    );
+    
+    if (jobsForEmployer.length === 0) {
+      return [];
+    }
+    
+    const jobIds = jobsForEmployer.map(j => j.id);
+    const jobPlaceholders = jobIds.map(() => '?').join(',');
+    
+    let sql = `SELECT * FROM candidates WHERE job_id IN (${jobPlaceholders})`;
+    const params: any[] = [...jobIds];
+
+    if (status) {
+      sql += ' AND status = ?';
+      params.push(status);
+    }
+
+    sql += ' ORDER BY applied_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    const candidates = await query<any[]>(sql, params);
+    return candidates.map(c => this.formatCandidateData(c));
+  }
+
+  /**
    * Get candidates for a specific job
    */
   static async findByJobId(jobId: string): Promise<ICandidate[]> {

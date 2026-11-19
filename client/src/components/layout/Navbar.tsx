@@ -6,6 +6,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useAppStore } from '@/stores/appStore';
+import { getRoleDisplayName } from '@/lib/roleDisplay';
 
 export function Navbar() {
   const { resolvedTheme, setTheme } = useThemeStore();
@@ -85,7 +86,7 @@ export function Navbar() {
             >
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-surface-800 dark:text-surface-200">{user.name}</p>
-                <p className="text-xs text-surface-500">{user.role}</p>
+                <p className="text-xs text-surface-500">{getRoleDisplayName(user.role as any, user.name)}</p>
               </div>
               <Avatar name={user.name} size="sm" />
             </button>
