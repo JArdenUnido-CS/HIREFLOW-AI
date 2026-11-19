@@ -8,6 +8,7 @@ import { DeleteConfirmationModal } from '@/components/ui/DeleteConfirmationModal
 import { PageTransition, StaggerContainer, StaggerItem } from '@/components/shared/PageTransition';
 import { AddCandidateModal } from './AddCandidateModal';
 import { candidatesApi } from '@/services/api';
+import { useAuthStore } from '@/stores/authStore';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +38,7 @@ const statusLabels: Record<string, string> = {
 
 export function CandidatesPage() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [candidates, setCandidates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,7 +143,7 @@ export function CandidatesPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">Candidates</h1>
+            <h1 className="text-2xl font-bold text-surface-900 dark:text-white">{user?.name || 'Candidates'}'s Candidates</h1>
             <p className="text-surface-500 mt-1">{candidates.length} total candidates</p>
           </div>
           <div className="flex gap-2">
